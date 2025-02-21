@@ -663,28 +663,28 @@ def triggerCardSkill(g:game, bot1:socket, bot2:socket, cardID:int, level:int):
             cheating(g, bot1, bot2)
         damage(g, 1-g.now_turn_player_id, level+cardID-29, cardID-28, bot1, bot2)
         # TODO 將你放置到與對手相鄰的格子
-    elif cardID in [35,36,37]: # 睡美人
+    elif cardID in [35,36,37]: # TODO 睡美人
     elif cardID in [38,39,40]:
     elif cardID in [41,42,43]:
-    elif cardID in [47,48,49]: # 愛麗絲
+    elif cardID in [47,48,49]: # TODO 愛麗絲
     elif cardID in [50,51,52]:
     elif cardID in [53,54,55]:
-    elif cardID in [59,60,61]: # 花木蘭
+    elif cardID in [59,60,61]: # TODO 花木蘭
     elif cardID in [62,63,64]:
     elif cardID in [65,66,67]:
-    elif cardID in [71,72,73]: # 輝夜姬
+    elif cardID in [71,72,73]: # TODO 輝夜姬
     elif cardID in [74,75,76]:
     elif cardID in [77,78,79]:
-    elif cardID in [83,84,85]: # 美人魚
+    elif cardID in [83,84,85]: # TODO 美人魚
     elif cardID in [86,87,88]:
     elif cardID in [89,90,91]:
-    elif cardID in [95,96,97]: # 火柴女孩
+    elif cardID in [95,96,97]: # TODO 火柴女孩
     elif cardID in [98,99,100]:
     elif cardID in [101,102,103]:
-    elif cardID in [107,108,109]: # 桃樂絲
+    elif cardID in [107,108,109]: # TODO 桃樂絲
     elif cardID in [110,111,112]:
     elif cardID in [113,114,115]:
-    elif cardID in [119,120,121]: # 山魯佐德
+    elif cardID in [119,120,121]: # TODO 山魯佐德
     elif cardID in [122,123,124]:
     elif cardID in [125,126,127]:
         
