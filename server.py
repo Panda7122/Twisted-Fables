@@ -258,6 +258,8 @@ def drawCard(g:game, target):
     top = g.players[target].deck[0]
     del g.players[target].deck[0]
     g.players[target].hand.append(top)
+def getlastcard(g:game):
+    return g.nowPlayer.usecards[len(g.nowPlayer.usecards)-2]
 def initializeGame(g:game, bot1:socket, bot2:socket):
     # initialize
         # init metadata
@@ -463,10 +465,25 @@ def dropCardFromHand(g:game, bot1:socket, bot2:socket):
     g.status = s
     return ret
 def knockback(g:game, bot1:socket, bot2:socket, dis):
-    # TODO
+    aloc = g.nowPlayer.locate[1]
+    bloc = g.nowTarget.locate[1]
+    if bloc-aloc > 0:
+        g.nowTarget.locate[1] = min(9, g.nowTarget.locate[1]+dis)
+    elif bloc-aloc < 0:
+        g.nowTarget.locate[1] = max(9, g.nowTarget.locate[1]-dis)
+    else:
+        cheating(g, bot1, bot2)
     return
 def dropDeck(g:game, target:int, bot1:socket, bot2:socket):
-    # TODO
+    if len(g.players[target].deck) == 0:
+        for i in range(g.players[target].graveyard.SIZE):
+            g.players[target].deck.append(g.players[target].graveyard[i])
+        for i in range(g.players[target].graveyard.SIZE):
+            del g.players[target].graveyard[i]
+        shuffle(g.players[target].deck)
+    top = g.players[target].deck[0]
+    del g.players[target].deck[0]
+    g.players[target].graveyard.append(top)
     return
 def USEATKBASIC(g:game, bot1:socket, bot2:socket):
     s = g.status
@@ -589,6 +606,7 @@ def chooseMovingDir(g:game, bot1:socket, bot2:socket):
     c = int.from_bytes(bot.recv(1), "little", True)
     if c not in [0,1]:
         cheating(g, bot1, bot2)
+    g.status = s
     return c
 def moveCharactor(g:game, dir:int, dis:int):
     dif = (dir*2-1)*dis
@@ -603,7 +621,7 @@ def moveCharactor(g:game, dir:int, dis:int):
         ret = True
     g.nowPlayer.locate[1]+=dif
     return ret
-def pushPosion(g:game, target):
+def putPosion(g:game, target):
     if g.players[1-target].snowWhite.remindPosion.SIZE == 0:
         return
     now = g.players[1-target].snowWhite.remindPosion[0]
@@ -614,8 +632,17 @@ def pushPosion(g:game, target):
         if g.nowTarget.metamorphosis[i] == 142:
             posion+=1
     lostLife(g, g.now_turn_player_id, posion)
-    
-    return
+def putTargetPosition(g:game, bot1:socket, bot2:socket):
+    s = g.status
+    bot = bot1 if g.now_turn_player_id == 0 else bot2
+    g.status = state.PUTTARGETPOSITION
+    bot.send(hideGameStatus(g).pack())
+    loc = int.from_bytes(bot.recv(4), "little", True)
+    card = getlastcard(g)
+    if card in [29,30,31]:
+        if loc not in [g.nowPlayer.locate[1]+1, g.nowPlayer.locate[1]-1] or loc<1 or loc>9:
+            cheating(g, bot1, bot2)
+    g.nowTarget.locate[1] = loc
 def triggerCardSkill(g:game, bot1:socket, bot2:socket, cardID:int, level:int):
     bot = bot1 if g.now_turn_player_id == 0 else bot2
     
@@ -644,7 +671,7 @@ def triggerCardSkill(g:game, bot1:socket, bot2:socket, cardID:int, level:int):
             cheating(g, bot1, bot2)
         dam = damage(g, 1-g.now_turn_player_id, 1, cardID-22+level, bot1, bot2)
         if dam >=2 and vectorHave(g.nowPlayer.metamorphosis, [139]):
-            pushPosion(g, 1-g.now_turn_player_id)
+            putPosion(g, 1-g.now_turn_player_id)
         for _ in range(cardID-22):
             dropDeck(g, 1-g.now_turn_player_id, bot1, bot2)
     elif cardID in [26,27,28]:
@@ -656,38 +683,62 @@ def triggerCardSkill(g:game, bot1:socket, bot2:socket, cardID:int, level:int):
         bot.send(hideGameStatus(g).pack())
         p = int.from_bytes(bot.recv(4), "little", True)
         for _ in range(p):
-            pushPosion(g, 1-g.now_turn_player_id)
+            putPosion(g, 1-g.now_turn_player_id)
         g.status = s
     elif cardID in [29,30,31]:
         if getRange(g)> level+cardID-29:
             cheating(g, bot1, bot2)
         damage(g, 1-g.now_turn_player_id, level+cardID-29, cardID-28, bot1, bot2)
-        # TODO 將你放置到與對手相鄰的格子
+        putTargetPosition(g, bot1, bot2)
     elif cardID in [35,36,37]: # TODO 睡美人
-    elif cardID in [38,39,40]:
-    elif cardID in [41,42,43]:
-    elif cardID in [47,48,49]: # TODO 愛麗絲
-    elif cardID in [50,51,52]:
-    elif cardID in [53,54,55]:
-    elif cardID in [59,60,61]: # TODO 花木蘭
-    elif cardID in [62,63,64]:
-    elif cardID in [65,66,67]:
-    elif cardID in [71,72,73]: # TODO 輝夜姬
-    elif cardID in [74,75,76]:
-    elif cardID in [77,78,79]:
-    elif cardID in [83,84,85]: # TODO 美人魚
-    elif cardID in [86,87,88]:
-    elif cardID in [89,90,91]:
-    elif cardID in [95,96,97]: # TODO 火柴女孩
-    elif cardID in [98,99,100]:
-    elif cardID in [101,102,103]:
-    elif cardID in [107,108,109]: # TODO 桃樂絲
-    elif cardID in [110,111,112]:
-    elif cardID in [113,114,115]:
-    elif cardID in [119,120,121]: # TODO 山魯佐德
-    elif cardID in [122,123,124]:
-    elif cardID in [125,126,127]:
         
+        pass
+    elif cardID in [38,39,40]:
+        pass
+    elif cardID in [41,42,43]:
+        pass
+    elif cardID in [47,48,49]: # TODO 愛麗絲
+        pass
+    elif cardID in [50,51,52]:
+        pass
+    elif cardID in [53,54,55]:
+        pass
+    elif cardID in [59,60,61]: # TODO 花木蘭
+        pass
+    elif cardID in [62,63,64]:
+        pass
+    elif cardID in [65,66,67]:
+        pass
+    elif cardID in [71,72,73]: # TODO 輝夜姬
+        pass
+    elif cardID in [74,75,76]:
+        pass
+    elif cardID in [77,78,79]:
+        pass
+    elif cardID in [83,84,85]: # TODO 美人魚
+        pass
+    elif cardID in [86,87,88]:
+        pass
+    elif cardID in [89,90,91]:
+        pass
+    elif cardID in [95,96,97]: # TODO 火柴女孩
+        pass
+    elif cardID in [98,99,100]:
+        pass
+    elif cardID in [101,102,103]:
+        pass
+    elif cardID in [107,108,109]: # TODO 桃樂絲
+        pass
+    elif cardID in [110,111,112]:
+        pass
+    elif cardID in [113,114,115]:
+        pass
+    elif cardID in [119,120,121]: # TODO 山魯佐德
+        pass
+    elif cardID in [122,123,124]:
+        pass
+    elif cardID in [125,126,127]:
+        pass
     return
 def main():
     initServer()
@@ -742,7 +793,7 @@ def main():
                     USEATKBASIC(g, bot1, bot2)
                     dam = damage(g, 1-g.now_turn_player_id, 1, g.nowATK)
                     if g.nowPlayer.character == 1 and dam >=2 and vectorHave(g.nowPlayer.metamorphosis, [139]):
-                        pushPosion(g, 1-g.now_turn_player_id)
+                        putPosion(g, 1-g.now_turn_player_id)
                     g.nowATK = 0
                 elif select == 2: # basic cards
                     # choose a basic card from hand
@@ -761,9 +812,9 @@ def main():
                         elif g.nowPlayer.charactor == 3 and vectorHave(g.nowPlayer.metamorphosis, [149]):
                             drawCard(g, g.now_turn_player_id)
                         elif g.nowTarget.charactor == 1 and vectorHave(g.nowTarget.metamorphosis, [141]):
-                            pushPosion(g, g.now_turn_player_id)
+                            putPosion(g, g.now_turn_player_id)
                         elif g.nowPlayer.charactor == 1 and vectorHave(g.nowTarget.metamorphosis, [141]):
-                            pushPosion(g, 1-g.now_turn_player_id)
+                            putPosion(g, 1-g.now_turn_player_id)
                     g.nowMOV = 0
                 elif select == 4: # use a skill
                     # choose a skill card from hand
@@ -788,10 +839,14 @@ def main():
                         level = USEBASIC(g, bot1, bot2)
                     triggerCardSkill(g, bot1, bot2, g.nowUsingCardID, level)
                     g.nowUsingCardID = 0
-                elif select == 5: # use a special card
-                elif select == 6: # buy a card
-                elif select == 7: # metamorphosis
-                elif select == 8: # charactor special move
+                elif select == 5: # TODO use a special card
+                    pass
+                elif select == 6: # TODO buy a card
+                    pass
+                elif select == 7: # TODO metamorphosis
+                    pass
+                elif select == 8: # TODO charactor special move
+                    pass
                 elif select == 9: # end
                     break
                 else:

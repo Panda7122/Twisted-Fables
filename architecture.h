@@ -92,7 +92,10 @@ CHOOSE_TENTACLE_LOCATION      int32_t      tentacle location
 CHOOSE_SPECIAL_CARD           int32_t      special card id
 CHOOSE_DESTINY_TOKEN          game         game status after set a DESTINY_TOKEN
 SET_TARGET_LOCATE_TO_NEARBY   int32_t      set location(1~9)
-CHOOSE_MOVE                   int32_t      choose moves(0:focus, 1-3:use basic cards(1:atk,2:def,3:mov), 4:use a skill card, 5:use a special card, 6:buy a card. 7:metamorphosis, 8:charactor special move,9:END) 
+CHOOSE_MOVE                   int32_t      choose moves
+                                           (0:focus, 1-3:use basic cards(1:atk,2:def,3:mov),
+                                            4:use a skill card, 5:use a special card, 6:buy a card,
+                                            7:metamorphosis, 8:charactor special move,9:END)
 REMOVE_HG                     int32_t      for remove card, choose hand or graveyard(negtive:graveyard, positive:hand, value:index of card, **1 base**)
 DROP_H                        int32_t      for drop card, choose hand(value:index of card, **1 base**)
 USE_ATK                       int32_t      for use atk basic card, choose hand(value:index of card, **1 base**, 0 is meaning stop use)
@@ -103,7 +106,8 @@ USE_SKILL                     int32_t      for use skill card, choose hand(value
 TRIGGER_COMBO                 int8_t       0:NO 1:YES(you dont need to implement this if you didn't implement dorothy)
 USEBASIC                      int32_t      for use skill card, choose basic card from hand(value:index of card, **1 base**)
 KNOCKBACK                     int32_t      knockback enemy distanse(hint:check avilable value on player's last use card)
-DEFPUSHPOSION                 int32_t      choose number of posion you want to push to target's deck(hint:check avilable value on player's last use card)
+PUTTARGETPOSITION            int32_t      choose number of posion you want to push to target's deck(hint:check avilable value on player's last use card and skill that you used)
+
 */
 typedef struct _game {
     player players[4];
