@@ -1,4 +1,5 @@
 import cstruct
+
 class vector(cstruct.MemCStruct):
     __def__ = """
     struct vector {
@@ -20,13 +21,15 @@ class vector(cstruct.MemCStruct):
         return self.array[key]
     def __len__(self):
         return self.SIZE
-    # def __init__(self, d:architecture):
-    #     self.data = d.vector
     def append(self, value):
         self.array[self.SIZE] = value
         self.SIZE+=1
-
-class buyDeck(cstruct.MemCStruct):
+    def to_list(self)->list:
+        return list(self.array[:self.SIZE])
+    @classmethod
+    def from_list(cls, ls:list):
+        return cls(array=ls, SIZE = len(ls))
+class CbuyDeck(cstruct.MemCStruct):
     __def__ = """
     struct buyDeck{
         struct vector cards;
@@ -35,7 +38,7 @@ class buyDeck(cstruct.MemCStruct):
     };
     """
 
-class player(cstruct.MemCStruct):
+class Cplayer(cstruct.MemCStruct):
     __def__ = """
     struct player {
         int8_t team;  // for 2v2 mode
@@ -52,9 +55,9 @@ class player(cstruct.MemCStruct):
         vector usecards;
         vector graveyard;
         vector metamorphosis;
-        buyDeck attackSkill;
-        buyDeck defenseSkill;
-        buyDeck moveSkill;
+        CbuyDeck attackSkill;
+        CbuyDeck defenseSkill;
+        CbuyDeck moveSkill;
         vector specialDeck;
         // Little Red Riding Hood 0
         struct {
@@ -108,16 +111,16 @@ class player(cstruct.MemCStruct):
     };
     """
 
-class state(cstruct.CEnum):
+class Cstate(cstruct.CEnum):
     __def__ = """
     enum state {
         
     }
     """
-class game(cstruct.MemCStruct):
+class Cgame(cstruct.MemCStruct):
     __def__ = """
     struct game {
-        player players[4];
+        Cplayer players[4];
         int8_t now_turn_player_id;
         int8_t playerMode;  // 1v1 MODE(0) or 2v2 MODE(1)
         int8_t relicMode;
@@ -128,8 +131,8 @@ class game(cstruct.MemCStruct):
         uint32_t relic[11];
         vector relicDeck;
         vector relicGraveyard;
-        buyDeck basicBuyDeck[4][3];  // attack(0) LV1~3 defense(1) LV1~3 move(2) LV1~3 generic(3)
-        enum state status;
+        buyDeck basicBuyDeck[12];  // attack(0) LV1~3 defense(1) LV1~3 move(2) LV1~3 generic(3)
+        enum Cstate status;
         // metadata (for using basic card)
         int32_t nowATK;
         int32_t nowDEF;
@@ -146,8 +149,3 @@ class game(cstruct.MemCStruct):
     @property
     def target(self):
         return 1-self.now_turn_player_id
-def vectorHave(vec:vector, ls:list):
-    for i in range(vec.SIZE):
-        if vec[i] in ls:
-            return True
-    return False

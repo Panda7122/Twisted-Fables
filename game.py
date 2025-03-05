@@ -1,0 +1,557 @@
+import cstruct
+import dataclasses
+import socket
+import copy
+import random
+import enum
+from ctype import *
+from characters.character import *
+
+@dataclasses.dataclass
+class buyDeck:
+    cards:list[int]
+    destiny_TOKEN:int
+    def to_CbuyDeck(self)->CbuyDeck:
+        return CbuyDeck(cards=vector.from_list(self.cards), destiny_TOKEN = self.destiny_TOKEN)
+    @classmethod
+    def from_CbuyDeck(cls, bd:CbuyDeck):
+        return cls(cards=bd.cards.to_list(), destiny_TOKEN = bd.destiny_TOKEN)
+@dataclasses.dataclass
+class player:
+    team:int
+    identity:character
+    locate:int
+    hand:list[int]
+    deck:list[int]
+    usecards:list[int]
+    graveyard:list[int]
+    metamorphosis:list[int]
+    attackSkill:buyDeck
+    defenseSkill:buyDeck
+    moveSkill:buyDeck
+    ULTDeck:list[int]
+    def to_Cplayer(self)->Cplayer:
+        ret = Cplayer(team = self.team,
+                locate = [0, self.locate],
+                character=self.identity.idx,
+                maxlife=self.identity.maxlife,
+                life=self.identity.life,
+                maxdefense=self.identity.maxdefense,
+                defense=self.identity.defense,
+                energy = self.identity.energy,
+                specialGate= self.identity.specialGate,
+                hand = vector.from_list(self.hand),
+                deck = vector.from_list(self.deck),
+                usecards = vector.from_list(self.usecards),
+                graveyard = vector.from_list(self.graveyard),
+                metamorphosis = vector.from_list(self.metamorphosis),
+                attackSkill = self.attackSkill.to_CbuyDeck(),
+                defenseSkill = self.defenseSkill.to_CbuyDeck(),
+                moveSkill = self.moveSkill.to_CbuyDeck(),
+                specialDeck = vector.from_list(self.ULTDeck),
+                )
+        if self.identity.idx == 0:
+            pass
+        elif self.identity.idx == 1:
+            ret.snowWhite.remindPosion = vector.from_list(self.identity.remindPosion)
+        elif self.identity.idx == 2:
+            ret.sleepingBeauty.AWAKEN_TOKEN = self.identity.AWAKEN_TOKEN
+            ret.sleepingBeauty.AWAKEN = self.identity.AWAKEN
+            ret.sleepingBeauty.dayNightmareDrawRemind = self.identity.dayNightmareDrawRemind
+        elif self.identity.idx == 3:
+            ret.alice.identity = self.identity.identity
+        elif self.identity.idx == 4:
+            ret.mulan.KI_TOKEN = self.identity.KI_TOKEN
+        elif self.identity.idx == 5:
+            pass
+        elif self.identity.idx == 6:
+            pass
+        elif self.identity.idx == 7:
+            ret.matchGirl.remindMatch = self.identity.remindMatch
+        elif self.identity.idx == 8:
+            ret.dorothy.COMBO_TOKEN = self.identity.COMBO_TOKEN
+            ret.dorothy.canCombo = self.identity.canCombo
+        elif self.identity.idx == 9:
+            pass
+    @classmethod
+    def from_Cplayer(cls, p:Cplayer):
+        char :character = character.getClass(p.character)(**{
+                    "remindPosion" : p.snowWhite.remindPosion.to_list(),
+                    "AWAKEN_TOKEN" : p.sleepingBeauty.AWAKEN_TOKEN,
+                    "AWAKEN" : p.sleepingBeauty.AWAKEN,
+                    "dayNightmareDrawRemind" : p.sleepingBeauty.dayNightmareDrawRemind,
+                    "identity":p.alice.identity,
+                    "KI_TOKEN":p.mulan.KI_TOKEN,
+                    "remindMatch":p.matchGirl.remindMatch,
+                    "COMBO_TOKEN":p.dorothy.COMBO_TOKEN,
+                    "canCombo":p.dorothy.canCombo,
+                })
+        char.maxlife = p.maxlife
+        char.life= p.life
+        char.maxdefense = p.maxdefense
+        char.defense = p.defense
+        char.energy = p.energy
+        char.specialGate = p.specialGate
+        return cls(
+            team = p.team,
+            identity = char,
+            locate = p.locate[1],
+            hand = p.hand.to_list(),
+            deck = p.deck.to_list(),
+            usecards = p.usecards.to_list(),
+            graveyard = p.graveyard.to_list(),
+            metamorphosis = p.metamorphosis.to_list(),
+            attackSkill = buyDeck.from_CbuyDeck(p.attackSkill),
+            defenseSkill = buyDeck.from_CbuyDeck(p.defenseSkill),
+            moveSkill = buyDeck.from_CbuyDeck(p.moveSkill),
+            ULTDeck = p.specialDeck.to_list()
+        )
+class state(enum.IntEnum):
+    pass # TODO states
+class game:
+    players:list[player]
+    nowid:int
+    playerMode:int
+    relicMode:int
+    tentacle_TOKEN_locate:list[int]
+    relic:list[int]
+    relicDeck:list[int]
+    relicGraveyard:list[int]
+    basicBuyDeck:list[list[buyDeck]]
+    status:state
+    nowATK:int
+    nowDEF:int
+    nowMOV:int
+    nowUsingCardID:int
+    def to_Cgame(self)->Cgame:
+        return Cgame(
+            players = list(map(player.to_Cplayer, self.players)),
+            now_turn_player_id = self.nowid,
+            playerMode = self.playerMode,
+            relicMode = self.relicMode,
+            tentacle_TOKEN_locate = vector.from_list(self.tentacle_TOKEN_locate),
+            relic = self.relic,
+            relicDeck = vector.from_list(self.relicDeck),
+            relicGraveyard = vector.from_list(self.relicGraveyard),
+            basicBuyDeck = list(map(buyDeck.to_CbuyDeck, [x for xs in self.basicBuyDeck for x in xs])),
+            status = self.status,
+            nowATK = self.nowATK,
+            nowDEF = self.nowDEF,
+            nowMOV = self.nowMOV,
+            nowUsingCardID = self.nowUsingCardID,
+        )
+    @classmethod
+    def from_Cgame(cls, cg:Cgame):
+        ls = list(map(buyDeck.from_CbuyDeck, cg.basicBuyDeck))
+        bbd = [[] for _ in range(4)]
+        for i in range(4):
+            for j in range(3):
+                bbd[i].append(ls[i*4+j])
+        return cls(
+            player = list(map(player.from_Cplayer, cg.players)),
+            nowid = cg.now_turn_player_id,
+            playerMode = cg.playerMode,
+            relicMode = cg.relicMode,
+            tentacle_TOKEN_locate = cg.tentacle_TOKEN_locate.to_list(),
+            relic = cg.relic,
+            relicDeck = cg.relicDeck.to_list(),
+            relicGraveyard = cg.relicGraveyard.to_list(),
+            basicBuyDeck = bbd,
+            status = cg.status,
+            nowATK = cg.nowATK,
+            nowDEF = cg.nowDEF,
+            nowMOV = cg.nowMOV,
+            nowUsingCardID = cg.nowUsingCardID
+        )
+    def lose(self):
+        for p in range(2):
+            if self.players[p].life <= 0:
+                print(f"Game over. player {2-p} WIN.")
+                svr.close()
+                exit()
+    def cheating(self):
+        self.players[self.nowid].life = 0
+        self.lose()
+    def hideGameStatus(self):
+        retg = copy.deepcopy(self)
+        for i in range(len(retg.players[0].deck)):
+            retg.players[0].deck[i] = -1
+        for i in range(len(retg.players[1].deck)):
+            retg.players[1].deck[i] = -1
+        for i in range(len(retg.players[1-self.nowid].hand)):
+            retg.players[0].hand[i] = -1
+        return retg
+    def getRange(self):
+        return abs(self.players[0].locate[1] - self.players[1].locate[1])
+    def countDestinyTOKEN(self):
+        ret = 0
+        ret += self.players[1-self.nowid].attackSkill.destiny_TOKEN
+        ret += self.players[1-self.nowid].defenseSkill.destiny_TOKEN
+        ret += self.players[1-self.nowid].moveSkill.destiny_TOKEN
+        for d in range(3):
+            for k in range(4):
+                ret += self.basicBuyDeck[d][k].destiny_TOKEN
+        return ret
+    def drawCard(self, target):
+        if len(self.players[target].deck) == 0:
+            for i in range(len(self.players[target].graveyard)):
+                self.players[target].deck.append(self.players[target].graveyard[i])
+            for i in range(len(self.players[target].graveyard)):
+                del self.players[target].graveyard[i]
+            random.shuffle(self.players[target].deck)
+        top = self.players[target].deck[0]
+        del self.players[target].deck[0]
+        self.players[target].hand.append(top)
+    def getlastcard(self):
+        return self.players[self.nowid].usecards[len( self.players[self.nowid].usecards)-2]
+    def lostLife(self, target:int, atk:int):
+        for i in range(len(self.players[target].usecards)):
+            if self.players[target].usecards[i] == 80:
+                return
+        if self.players[target].life<=atk:
+            self.players[target].life = 0
+            # target lose
+            self.lose()
+            pass
+        self.players[target].life -= atk
+    def getDamage(self,target:int,  dam:int):
+        #TODO done get Damage
+        c = self.players[target].character
+        if c == 0: # 小紅帽
+            pass
+        elif c == 1: # 白雪公主
+            pass
+        elif c == 2: # 睡美人
+            pass
+        elif c == 3: # 愛麗絲
+            pass
+        elif c == 4: # 花木蘭
+            pass
+        elif c == 5: # 輝夜姬
+            pass
+        elif c == 6: # 美人魚
+            pass
+        elif c == 7: # 火柴女孩
+            pass
+        elif c == 8: # 桃樂絲
+            pass
+        elif c == 9: # 山魯佐德
+            pass
+        
+        if target == 0: # 小紅帽
+            pass
+        elif target == 1: # 白雪公主
+            pass
+        elif target == 2: # 睡美人
+            for i in range(len(self.players[1-self.nowid].usecards)):
+                if self.players[1-self.nowid].usecards[i] == 45:
+                    for _ in range(min(self.players[1-self.nowid].sleepingBeauty.dayNightmareDrawRemind, dam)):
+                        self.drawCard(target)
+                    self.players[1-self.nowid].sleepingBeauty.dayNightmareDrawRemind-=min(self.players[1-self.nowid].sleepingBeauty.dayNightmareDrawRemind, dam)
+            pass
+        elif target == 3: # 愛麗絲
+            pass
+        elif target == 4: # 花木蘭
+            pass
+        elif target == 5: # 輝夜姬
+            pass
+        elif target == 6: # 美人魚
+            pass
+        elif target == 7: # 火柴女孩
+            pass
+        elif target == 8: # 桃樂絲
+            pass
+        elif target == 9: # 山魯佐德
+            pass
+    def damage(self, target:int,  distanse:int, atk:int):
+        for i in range(self.players[target].usecards.SIZE):
+            if self.players[target].usecards[i] == 80:
+                return
+        if(self.getRange()<=distanse):
+            dam = atk - self.players[target].defense
+            if dam <= 0:
+                self.players[target].defense -= atk
+            else:
+                self.players[target].defense = 0
+                if self.players[target].life < dam:
+                    self.players[target].life = 0
+                    # target lose
+                    self.lose()
+                self.players[target].life -= dam
+                self.getDamage(target, dam)
+        else:
+            self.cheating()
+        return dam
+    def setLocate(self, target:int, locate:int):
+        if locate > 9 or locate < 1:
+            # cheat
+            self.cheating()                    
+        self.players[target].locate[1] = locate
+    def chooseMove(self):
+        s = self.status
+        self.status = state.CHOOSE_MOVE
+        ret = svr.connectBot(self.nowid, "int32_t", self)
+        self.status = s
+        return ret
+    def chooseCardFromHandorGraveyard(self):
+        s = self.status
+        self.status = state.REMOVE_HG
+        ret = svr.connectBot(self.nowid, "int32_t", self)
+        if ret == 0:
+            # cheat
+            self.cheating()
+        sign = 1 if ret > 0 else 0
+        ret = abs(ret)-1
+        if sign:
+            if ret >= self.players[self.nowid].hand.SIZE:
+                # cheat
+                self.cheating()
+        else:
+            if ret >= self.players[self.nowid].graveyard.SIZE:
+                # cheat
+                self.cheating()
+        self.status = s
+        return (sign, ret)
+    def dropCardFromHand(self):
+        s = self.status
+        self.status = state.DROP_H
+        ret = svr.connectBot(self.nowid, "int32_t", self)
+        if ret >= len(self.players[self.nowid].hand) or ret <= 0:
+            # cheat
+            self.cheating()
+        ret -= 1
+        self.status = s
+        return ret
+    def knockback(self, dis:int):
+        aloc = self.players[self.nowid].locate[1]
+        bloc = self.players[1-self.nowid].locate[1]
+        if bloc-aloc > 0:
+            self.players[1-self.nowid].locate[1] = min(9, self.players[1-self.nowid].locate[1]+dis)
+        elif bloc-aloc < 0:
+            self.players[1-self.nowid].locate[1] = max(9, self.players[1-self.nowid].locate[1]-dis)
+        else:
+            self.cheating()
+        return
+    def dropDeck(self, target:int):
+        if len(self.players[target].deck) == 0:
+            for i in range(len(self.players[target].graveyard)):
+                self.players[target].deck.append(self.players[target].graveyard[i])
+            for i in range(len(self.players[target].graveyard)):
+                del self.players[target].graveyard[i]
+            random.shuffle(self.players[target].deck)
+        top = self.players[target].deck[0]
+        del self.players[target].deck[0]
+        self.players[target].graveyard.append(top)
+    def USEATKBASIC(self):
+        s = self.status
+        self.status = state.USE_ATK
+        self.nowATK = 0
+        basicATK = [1,2,3]
+        if self.players[1-self.nowid].charactor == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [166]):
+            basicATK.append(134)
+        while True:
+            c = svr.connectBot(self.nowid, "int32_t", self)
+            if c >= self.players[self.nowid].hand.SIZE or c < 0 or self.players[self.nowid].hand[c] not in basicATK:
+                # cheat
+                self.cheating()
+            if c == 0:
+                break
+            
+            self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
+            self.nowATK += self.players[self.nowid].hand[c] if self.players[self.nowid].hand[c] !=134 else 1
+            if self.players[self.nowid].hand[c] !=134:
+                self.players[self.nowid].energy+=self.players[self.nowid].hand[c]
+            del self.players[self.nowid].hand[c]
+        self.status = s
+    def USEDEFBASIC(self):
+        s = self.status
+        self.status = state.USE_DEF
+        self.nowDEF = 0
+        basicDEF = [1,2,3]
+        if self.players[1-self.nowid].charactor == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [167]):
+            basicDEF.append(134)
+        while True:
+            c = svr.connectBot(self.nowid, "int32_t", self)
+            if c >= self.players[self.nowid].hand.SIZE or c < 0 or self.players[self.nowid].hand[c] not in basicDEF:
+                # cheat
+                self.cheating()
+            if c == 0:
+                break
+            self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
+            self.nowDEF += (self.players[self.nowid].hand[c] - 3) if self.players[self.nowid].hand[c] !=134 else 1
+            if self.players[self.nowid].hand[c] !=134:
+                self.players[self.nowid].energy+=(self.players[self.nowid].hand[c] - 3)
+            del self.players[self.nowid].hand[c]
+        self.status = s
+    def USEMOVBASIC(self):
+        s = self.status
+        self.status = state.USE_MOV
+        self.nowMOV = 0
+        basicMOV = [1,2,3]
+        if self.players[1-self.nowid].charactor == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [168]):
+            basicMOV.append(134)
+        while True:
+            c = svr.connectBot(self.nowid, "int32_t", self)
+            if c >= self.players[self.nowid].hand.SIZE or c < 0 or self.players[self.nowid].hand[c] not in basicMOV:
+                # cheat
+                self.cheating()
+            if c == 0:
+                break
+            self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
+            self.nowMOV += (self.players[self.nowid].hand[c] - 6) if self.players[self.nowid].hand[c] !=134 else 1
+            if self.players[self.nowid].hand[c] !=134:
+                self.players[self.nowid].energy+=(self.players[self.nowid].hand[c] - 6)
+            
+            del self.players[self.nowid].hand[c]
+        self.status = s
+    def USESKILL(self):
+        s = self.status
+        self.status = state.USE_SKILL
+        c = svr.connectBot(self.nowid, "int32_t", self)
+        skillC = [(self.players[self.nowid].charactor*12+11+j) for j in range(9)]
+        if c >= self.players[self.nowid].hand.SIZE or c < 0 or self.players[self.nowid].hand[c] not in skillC:
+            # cheat
+            self.cheating()
+        
+        self.nowUsingCardID = self.players[self.nowid].hand[c]
+        self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
+        del self.players[self.nowid].hand[c]
+        self.status = s
+    def USEBASIC(self):
+        s = self.status
+        self.status = state.USE_BASIC
+        c = svr.connectBot(self.nowid, "int32_t", self)
+        typeC = self.nowUsingCardID - 11 - 12*self.players[self.nowid].charactor
+        if typeC == [0,1,2]:
+            basic = [1,2,3]
+            if self.players[1-self.nowid].charactor == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [166]):
+                basic.append(134)
+        elif typeC == [3,4,5]:
+            basic = [4,5,6]
+            if self.players[1-self.nowid].charactor == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [167]):
+                basic.append(134)
+        elif typeC == [6,7,8]:
+            basic = [7,8,9]
+            if self.players[1-self.nowid].charactor == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [168]):
+                basic.append(134)
+        if c >= self.players[self.nowid].hand.SIZE or c < 0 or self.players[self.nowid].hand[c] not in basic:
+            # cheat
+            self.cheating()
+        self.status = s
+        ret = self.players[self.nowid].hand[c]
+        self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
+        del self.players[self.nowid].hand[c]
+        return (ret-1)%3+1
+    def chooseMovingDir(self):
+        s = self.status
+        self.status = state.CHOOSE_MOVING_DIR
+        c = svr.connectBot(self.nowid, "int8_t", self)
+        if c not in [0,1]:
+            self.cheating()
+        self.status = s
+        return c
+    def moveCharactor(self, dir:int, dis:int):
+        dif = (dir*2-1)*dis
+        ret = False
+        while self.nowPlayer.locate[1]+dif >9 or self.nowPlayer.locate[1]+dif<1:
+            dis -=1
+            dif = (dir*2-1)*dis
+        if self.getRange()==dis:
+            dis-=1
+            dif = (dir*2-1)*dis
+        elif self.getRange()>dis:
+            ret = True
+        self.nowPlayer.locate[1]+=dif
+        return ret
+    def putPosion(self, target):
+        if self.players[1-target].snowWhite.remindPosion.SIZE == 0:
+            return
+        now = self.players[1-target].snowWhite.remindPosion[0]
+        self.nowPlayer.graveyard.append(now)
+        self.players[1-target].snowWhite.remindPosion-=1
+        posion = self.nowPlayer.usecards[i]-131
+        for i in range(self.players[1-self.nowid].metamorphosis.SIZE):
+            if self.players[1-self.nowid].metamorphosis[i] == 142:
+                posion+=1
+        self.lostLife(self.nowid, posion)
+    def putTargetPosition(self):
+        s = self.status
+        self.status = state.PUTTARGETPOSITION
+        loc = svr.connectBot(self.nowid, "int32_t", self)
+        card = self.getlastcard()
+        if card in [29,30,31]:
+            if loc not in [self.nowPlayer.locate[1]+1, self.nowPlayer.locate[1]-1] or loc<1 or loc>9:
+                self.cheating()
+        self.nowTarget.locate[1] = loc
+def vectorHave(vec:list, ls:list):
+    for i in range(len(vec)):
+        if vec[i] in ls:
+            return True
+    return False
+@dataclasses.dataclass
+class skillCard:
+    picture:str
+    cardName:str
+    def skill(self):
+        raise NotImplementedError("skill didn't implement")
+@dataclasses.dataclass
+class atkCard(skillCard):
+    level:int
+    def skill(self):
+        raise NotImplementedError("atk skill didn't implement")
+@dataclasses.dataclass
+class defCard(skillCard):
+    level:int
+    def skill(self):
+        raise NotImplementedError("atk skill didn't implement")
+@dataclasses.dataclass
+class movCard(skillCard):
+    level:int
+    def skill(self):
+        raise NotImplementedError("atk skill didn't implement")
+@dataclasses.dataclass
+class metaCard(skillCard):
+    def skill(self):
+        raise NotImplementedError("metamorphosis didn't implement")
+@dataclasses.dataclass
+class ultraCard(skillCard):
+    def skill(self):
+        raise NotImplementedError("metamorphosis didn't implement")
+    
+class server:
+    host = None
+    ip = None
+    port = 8080
+    server_socket = None
+    bots:list[socket.socket]
+    def __init__(self):
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.host = socket.gethostname()
+        self.ip = socket.gethostbyname(self.host)       
+        self.server_socket.bind((self.ip, self.port))
+        self.server_socket.listen(5)
+        print(f"Server started and listening on host {self.host}({self.ip}) port {self.port}")
+    def accept(self):
+        self.bots[0], addr1 = self.server_socket.accept()
+        print(f"BOT1 Connection accepted from {addr1}")
+        self.bots[1], addr2 = self.server_socket.accept()
+        print(f"BOT2 Connection accepted from {addr2}")
+    def close(self):
+        self.bot1.close()
+        self.bot2.close()
+        self.server_socket.close()
+    def connectBot(self, which, rettype, g:game):
+        self.bots[which].send(g.hideGameStatus().to_Cgame().pack())
+        if rettype == 'int32_t':
+            return int.from_bytes(self.bots[which].recv(4), "little", True)
+        elif rettype == 'int8_t':
+            return int.from_bytes(self.bots[which].recv(1), "little", True)
+        elif rettype == 'uint32_t':
+            return int.from_bytes(self.bots[which].recv(4), "little", False)
+        elif rettype == 'uint8_t':
+            return int.from_bytes(self.bots[which].recv(1), "little", False)
+        elif rettype == 'game':
+            return game.from_Cgame(Cgame.unpack(self.bots[which].recv(cstruct.sizeof(Cgame))))
+svr:server = server()
+

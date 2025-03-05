@@ -106,8 +106,8 @@ USE_SKILL                     int32_t      for use skill card, choose hand(value
 TRIGGER_COMBO                 int8_t       0:NO 1:YES(you dont need to implement this if you didn't implement dorothy)
 USEBASIC                      int32_t      for use skill card, choose basic card from hand(value:index of card, **1 base**)
 KNOCKBACK                     int32_t      knockback enemy distanse(hint:check avilable value on player's last use card)
-PUTTARGETPOSITION            int32_t      choose number of posion you want to push to target's deck(hint:check avilable value on player's last use card and skill that you used)
-
+PUTTARGETPOSITION             int32_t      choose number of posion you want to push to target's deck(hint:check avilable value on player's last use card and skill that you used)
+SLEEPATKHERTSELF              int32_t
 */
 typedef struct _game {
     player players[4];
