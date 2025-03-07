@@ -422,9 +422,9 @@ class game:
         top = self.players[target].deck[0]
         del self.players[target].deck[0]
         self.players[target].graveyard.append(top)
-    def USEPOSION(self):
+    def USEPOSION(self, g):
         s = self.status
-        self.status = state.USEPOSION
+        self.status = state.USE_POSION
         c = svr.connectBot(self.nowid, "int32_t", g)
         if c >= len(self.players[self.nowid].hand) or c < 0 or self.players[self.nowid].hand[c] not in [131,132,133]:
             self.cheating()

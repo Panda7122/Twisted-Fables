@@ -107,6 +107,7 @@ DROP_H                        int32_t      for drop card, choose hand(value:inde
 USE_ATK                       int32_t      for use atk basic card, choose hand(value:index of card, **1 base**, 0 is meaning stop use)
 USE_DEF                       int32_t      for use def basic card, choose hand(value:index of card, **1 base**, 0 is meaning stop use)
 USE_MOV                       int32_t      for use mov basic card, choose hand(value:index of card, **1 base**, 0 is meaning stop use)
+USE_POSION                    int32_t      for use posion card, choose hand(value:index of card, **1 base**)
 CHOOSE_MOVING_DIR             int8_t       moving face(0:left, 1:right)
 USE_SKILL                     int32_t      for use skill card, choose hand(value:index of card, **1 base**)
 TRIGGER_COMBO                 int8_t       0:NO 1:YES(you dont need to implement this if you didn't implement dorothy)
