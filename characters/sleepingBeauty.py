@@ -2,6 +2,8 @@ from game import *
 from character import *
 class sleepingBeautyATKSkill(atkCard):
     def skill(self, g:game, level):
+        if g.getRange() > 1:
+            g.cheating()
         s = g.status
         g.status = state.SLEEPATKHERTSELF
         h = svr.connectBot(g.nowid, 'int32_t', g)
@@ -13,9 +15,23 @@ class sleepingBeautyATKSkill(atkCard):
         g.status = s
 class sleepingBeautyDEFSkill(defCard):
     def skill(self, g:game, level):
+        if g.players[g.nowid].identity.AWAKEN == 1:
+            q = g.players[g.nowid].identity.askUseAWAKENTOKEN()
+        else:
+            q = 0
+        g.players[g.nowid].identity.atkRiseTime = g+level
+        g.players[g.nowid].identity.atkRise = self.level
         pass
 class sleepingBeautyMOVSkill(movCard):
     def skill(self, g:game, level):
+        if g.getRange() > self.level+1:
+            g.cheating()
+        if g.players[g.nowid].identity.AWAKEN == 1:
+            q = g.players[g.nowid].identity.askUseAWAKENTOKEN()
+        else:
+            q = 0
+        g.damage(1-g.now, self.level+1, level + g)
+        g.knockback(-min(g.getRange()-1, level))
         pass
 class sleepingBeautyMETASkill(metaCard):
     def skill(self, g:game, level):
@@ -38,11 +54,15 @@ class sleepingBeauty(character):
         self.AWAKEN_TOKEN = 0
         self.AWAKEN = 0
         self.dayNightmareDrawRemind = 0
-    def __init__(self, AWEAKEN = 0, AWAKEN_TOKEN = 0, dayNightmareDrawRemind = 0, **kwargs):
+        self.atkRise = 0
+        self.atkRiseTime = 0
+    def __init__(self, AWEAKEN = 0, AWAKEN_TOKEN = 0, dayNightmareDrawRemind = 0, atkRise = 0, atkRiseTime = 0, **kwargs):
         self.setup()
         self.AWAKEN_TOKEN = AWAKEN_TOKEN
         self.AWAKEN = AWEAKEN
         self.dayNightmareDrawRemind = dayNightmareDrawRemind
+        self.atkRise = atkRise
+        self.atkRiseTime = atkRiseTime
         self.characterName = "睡美人"
         self.picture = "沒有圖片"
         atklv1 =  sleepingBeautyATKSkill("沒有圖片", "", 1)
@@ -74,6 +94,6 @@ class sleepingBeauty(character):
         ultra1 =  sleepingBeautyUltraSkill("沒有圖片", "", 0)
         ultra2 =  sleepingBeautyUltraSkill("沒有圖片", "", 0)
         ultra3 =  sleepingBeautyUltraSkill("沒有圖片", "", 0)
-        self.moveSkill.append(ultra1)
-        self.moveSkill.append(ultra2)
-        self.moveSkill.append(ultra3)
+        self.ultraSkill.append(ultra1)
+        self.ultraSkill.append(ultra2)
+        self.ultraSkill.append(ultra3)

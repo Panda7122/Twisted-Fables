@@ -50,29 +50,31 @@ class Cplayer(cstruct.MemCStruct):
         uint8_t defense;
         uint8_t energy;
         uint8_t specialGate;
-        vector hand;
-        vector deck;
-        vector usecards;
-        vector graveyard;
-        vector metamorphosis;
-        CbuyDeck attackSkill;
-        CbuyDeck defenseSkill;
-        CbuyDeck moveSkill;
-        vector specialDeck;
+        struct vector hand;
+        struct vector deck;
+        struct vector usecards;
+        struct vector graveyard;
+        struct vector metamorphosis;
+        struct CbuyDeck attackSkill;
+        struct CbuyDeck defenseSkill;
+        struct CbuyDeck moveSkill;
+        struct vector specialDeck;
         // Little Red Riding Hood 0
         struct {
         } redHood;
 
         // Snow White 1
         struct {
-            vector remindPosion;
+            struct vector remindPosion;
         } snowWhite;
 
         // sleeping Beauty 2
-        struct {
+        struct _sleepingBeauty{
             uint32_t AWAKEN_TOKEN;
             int8_t AWAKEN;  // awaken(1) or sleep(0)
             int8_t dayNightmareDrawRemind;
+            int32_t atkRise;
+            int32_t atkRiseTime;
         } sleepingBeauty;
 
         // alice 3
@@ -120,18 +122,18 @@ class Cstate(cstruct.CEnum):
 class Cgame(cstruct.MemCStruct):
     __def__ = """
     struct game {
-        Cplayer players[4];
+        struct Cplayer players[4];
         int8_t now_turn_player_id;
         int8_t playerMode;  // 1v1 MODE(0) or 2v2 MODE(1)
         int8_t relicMode;
         // mermaid
-        vector tentacle_TOKEN_locate;
+        struct vector tentacle_TOKEN_locate;
 
         // 1v1 MODE is from 1 to 9
         uint32_t relic[11];
-        vector relicDeck;
-        vector relicGraveyard;
-        buyDeck basicBuyDeck[12];  // attack(0) LV1~3 defense(1) LV1~3 move(2) LV1~3 generic(3)
+        struct vector relicDeck;
+        struct vector relicGraveyard;
+        struct buyDeck basicBuyDeck[12];  // attack(0) LV1~3 defense(1) LV1~3 move(2) LV1~3 generic(3)
         enum Cstate status;
         // metadata (for using basic card)
         int32_t nowATK;

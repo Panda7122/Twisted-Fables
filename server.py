@@ -200,69 +200,14 @@ def initializeGame(g:game):
 
 
 def triggerCardSkill(g:game, cardID:int, level:int):
-    
-    if cardID in [11,12,13]: # 小紅帽
-        g.players[g.nowid].identity.atkSkill[cardID-11].skill(g, level)
-    elif cardID in [14,15,16]: 
-        g.players[g.nowid].identity.defSkill[cardID-14].skill(g, level)
-    elif cardID in [17,18,19]:
-        g.players[g.nowid].identity.movSkill[cardID-17].skill(g, level)
-    elif cardID in [23,24,25]: # 白雪公主
-        g.players[g.nowid].identity.atkSkill[cardID-23].skill(g, level)
-    elif cardID in [26,27,28]:
-        g.players[g.nowid].identity.defSkill[cardID-26].skill(g, level)
-    elif cardID in [29,30,31]:
-        g.players[g.nowid].identity.movSkill[cardID-29].skill(g, level)
-    elif cardID in [35,36,37]: # TODO 睡美人
-        g.players[g.nowid].identity.atkSkill[cardID-35].skill(g, level)
-        pass
-    elif cardID in [38,39,40]:
-        pass
-    elif cardID in [41,42,43]:
-        pass
-    elif cardID in [47,48,49]: # TODO 愛麗絲
-        pass
-    elif cardID in [50,51,52]:
-        pass
-    elif cardID in [53,54,55]:
-        pass
-    elif cardID in [59,60,61]: # TODO 花木蘭
-        pass
-    elif cardID in [62,63,64]:
-        pass
-    elif cardID in [65,66,67]:
-        pass
-    elif cardID in [71,72,73]: # TODO 輝夜姬
-        pass
-    elif cardID in [74,75,76]:
-        pass
-    elif cardID in [77,78,79]:
-        pass
-    elif cardID in [83,84,85]: # TODO 美人魚
-        pass
-    elif cardID in [86,87,88]:
-        pass
-    elif cardID in [89,90,91]:
-        pass
-    elif cardID in [95,96,97]: # TODO 火柴女孩
-        pass
-    elif cardID in [98,99,100]:
-        pass
-    elif cardID in [101,102,103]:
-        pass
-    elif cardID in [107,108,109]: # TODO 桃樂絲
-        pass
-    elif cardID in [110,111,112]:
-        pass
-    elif cardID in [113,114,115]:
-        pass
-    elif cardID in [119,120,121]: # TODO 山魯佐德
-        pass
-    elif cardID in [122,123,124]:
-        pass
-    elif cardID in [125,126,127]:
-        pass
-    return
+    if (cardID-11)%12 < 3: # attack skill
+        g.players[g.nowid].identity.attackSkill[(cardID-11)%3].skill(g, level)
+    elif (cardID-11)%12 < 6: # defense skill
+        g.players[g.nowid].identity.defenseSkill[(cardID-14)%3].skill(g, level)
+    elif (cardID-11)%12 < 9: # move skill
+        g.players[g.nowid].identity.moveSkill[(cardID-17)%3].skill(g, level)
+    else:#ultra
+        g.players[g.nowid].identity.ultraSkill[(cardID-17)%3].skill(g, level)
 def main():
     svr.accept()
 
@@ -310,7 +255,7 @@ def main():
                     # choose a basic card from hand
                     g.USEATKBASIC()
                     dam = g.damage(1-g.nowid, 1, g.nowATK)
-                    if g.players[g.nowid].character == 1 and dam >=2 and vectorHave(g.players[g.nowid].metamorphosis, [139]):
+                    if g.players[g.nowid].identity.idx == 1 and dam >=2 and vectorHave(g.players[g.nowid].metamorphosis, [139]):
                         g.putPosion( 1-g.nowid)
                     g.nowATK = 0
                 elif select == 2: # basic cards
@@ -323,22 +268,22 @@ def main():
                     # choose a basic card from hand
                     g.USEDEFBASIC()
                     dir = g.chooseMovingDir()
-                    through = g.moveCharactor( dir, g.nowMOV)
+                    through = g.moveCharacter( dir, g.nowMOV)
                     if through:
-                        if g.players[1-g.nowid].charactor == 3 and vectorHave(g.players[1-g.nowid].metamorphosis, [149]):
+                        if g.players[1-g.nowid].identity.idx == 3 and vectorHave(g.players[1-g.nowid].metamorphosis, [149]):
                             g.drawCard( 1-g.nowid)
-                        elif g.players[g.nowid].charactor == 3 and vectorHave(g.players[g.nowid].metamorphosis, [149]):
+                        elif g.players[g.nowid].identity.idx == 3 and vectorHave(g.players[g.nowid].metamorphosis, [149]):
                             g.drawCard( g.nowid)
-                        elif g.players[1-g.nowid].charactor == 1 and vectorHave(g.players[1-g.nowid].metamorphosis, [141]):
+                        elif g.players[1-g.nowid].identity.idx == 1 and vectorHave(g.players[1-g.nowid].metamorphosis, [141]):
                             g.putPosion( g.nowid)
-                        elif g.players[g.nowid].charactor == 1 and vectorHave(g.players[1-g.nowid].metamorphosis, [141]):
+                        elif g.players[g.nowid].identity.idx == 1 and vectorHave(g.players[1-g.nowid].metamorphosis, [141]):
                             g.putPosion( 1-g.nowid)
                     g.nowMOV = 0
                 elif select == 4: # use a skill
                     # choose a skill card from hand
                     card = g.USESKILL()
                     # if is dorothy
-                    if g.players[g.nowid].charactor == 8 and g.players[g.nowid].dorothy.canCombo:
+                    if g.players[g.nowid].identity.idx == 8 and g.players[g.nowid].dorothy.canCombo:
                         # ask combo
                         s = g.status
                         g.status = state.TRIGGER_COMBO
@@ -358,20 +303,58 @@ def main():
                     g.nowUsingCardID = 0
                 elif select == 5: # TODO use a special card
                     pass
-                elif select == 6: # TODO buy a card
-                    pass
+                elif select == 6: # buy a card
+                    g.status = state.BUY_CARD_TYPE
+                    ct = svr.connectBot(g.nowid, "int32_t", g)
+                    if(ct not in [-1,-2,-3,1,2,3,4]):
+                        g.cheating()
+                    if(ct<0):
+                        if ct == -1:
+                            g.players[g.nowid].buyATKCard()
+                        if ct == -2:
+                            g.players[g.nowid].buyDEFCard()
+                        if ct == -3:
+                            g.players[g.nowid].buyMOVCard()
+                    else:
+                        
+                        if(ct == 4):
+                            lv = 1
+                        else:
+                            g.status = state.BUY_CARD_LV
+                            lv = svr.connectBot(g.nowid, "int32_t", g)
+                            if(lv not in [1,2,3]):
+                                g.cheating()
+                        
+                        if len(g.basicBuyDeck[ct-1][lv-1]) == 0:
+                            g.cheating()
+                        pz = BASIC_PRIZE[ct-1][lv-1]
+                        if g.players[g.nowid].identity.energy < pz:
+                            g.cheating()
+                        g.players[g.nowid].identity.energy -= pz
+                        cd = g.basicBuyDeck[ct-1][lv-1][-1]
+                        g.basicBuyDeck[ct-1][lv-1].pop()
+                        g.players[g.nowid].graveyard.append(cd)
+                        if g.players[1-g.nowid].identity.idx == 9 and g.basicBuyDeck[ct-1][lv-1].destiny_TOKEN != 0:
+                            g.players[1-g.nowid].identity.triggerDestiny(g, (ct-1)*3+lv)
                 elif select == 7: # TODO metamorphosis
+                    card = g.USESKILL()
+                    triggerCardSkill(g, card, 0)
                     pass
                 elif select == 8: # TODO charactor special move
+                    
                     pass
-                elif select == 9: # end
+                elif select == 9: # drop poison
+                    g.USEPOSION()
+                    
+                    pass
+                elif select == 10: # end
                     break
                 else:
                     # cheat            
                     g.cheating()
                     pass
                 move = True
-                if g.players[g.nowid].charactor == 8:
+                if g.players[g.nowid].identity.idx == 8:
                     if select in [0,1,2,3,5,6]:
                         g.players[g.nowid].dorothy.canCombo = 0
             # end phase
