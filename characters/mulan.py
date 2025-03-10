@@ -1,14 +1,66 @@
+import sys 
+sys.path.append("..")
 from game import *
 from character import *
 class mulanATKSkill(atkCard):
     def skill(self, g:game, level):
-        pass
+        g.damage(1-g.nowid, 1, self.level+level)
+        g.players[g.nowid].identity.putAnotherSide(g)
+        if g.players[1-g.nowid].locate in [1,9]:
+            cid = random.randint(0,len(g.players[1-g.nowid].hand-1))
+            card = g.players[1-g.nowid].hand[cid]
+            del g.players[1-g.nowid].hand[cid]
+            g.players[1-g.nowid].graveyard.append(card)
+            if card == 134:
+                eneragy = 1
+                for i in range(g.players[1-g.nowid].metamorphosis.SIZE):
+                    if g.players[1-g.nowid].metamorphosis[i] in [166,167,168]:
+                        eneragy+=1
+                g.players[1-g.nowid].energy += eneragy
+            if card in [131, 132, 133]:
+                posion = card-131
+                for i in range(g.players[1-g.nowid].metamorphosis.SIZE):
+                    if g.players[1-g.nowid].metamorphosis[i] == 142:
+                        posion+=1
+                g.lostLife( g.nowid, posion)
 class mulanDEFSkill(defCard):
     def skill(self, g:game, level):
-        pass
+        g.players[g.nowid].identity.defense += level
+        g.players[g.nowid].identity.defense = min(g.players[g.nowid].identity.maxdefense, g.players[g.nowid].identity.defense)
+        g.players[g.nowid].identity.extraCard += self.level
 class mulanMOVSkill(movCard):
     def skill(self, g:game, level):
-        pass
+        g.damage(1-g.nowid, 1, self.level)
+        g.knockback(level)
+        g.status = state.CHOOSE_MOVE_NEARBY
+        side = svr.connectBot(g.nowid, "int8_t", g)
+        if side == 1:
+            if(g.players[g.nowid].locate-1>9):
+                g.cheating()
+            g.setLocate(g.players[g.nowid].locate+1)
+        elif side == -1:
+            if(g.players[g.nowid].locate-1<1):
+                g.cheating()
+            g.setLocate(g.players[g.nowid].locate-1)
+        elif side != 0:
+            g.cheating()
+        if g.players[1-g.nowid].locate in [1,9]:
+            cid = random.randint(0,len(g.players[1-g.nowid].hand-1))
+            card = g.players[1-g.nowid].hand[cid]
+            del g.players[1-g.nowid].hand[cid]
+            g.players[1-g.nowid].graveyard.append(card)
+            if card == 134:
+                eneragy = 1
+                for i in range(g.players[1-g.nowid].metamorphosis.SIZE):
+                    if g.players[1-g.nowid].metamorphosis[i] in [166,167,168]:
+                        eneragy+=1
+                g.players[1-g.nowid].energy += eneragy
+            if card in [131, 132, 133]:
+                posion = card-131
+                for i in range(g.players[1-g.nowid].metamorphosis.SIZE):
+                    if g.players[1-g.nowid].metamorphosis[i] == 142:
+                        posion+=1
+                g.lostLife( g.nowid, posion)
 class mulanMETASkill(metaCard):
     def skill(self, g:game, level):
         # TODO not implement yet
@@ -28,9 +80,11 @@ class mulan(character):
         self.energy = 0
         self.specialGate = 17   
         self.KI_TOKEN = 0
-    def __init__(self, KI_TOKEN = 0, **kwargs):
+        self.extraCard = 0
+    def __init__(self, KI_TOKEN = 0, extraCard = 0, **kwargs):
         self.setup()
         self.KI_TOKEN = KI_TOKEN
+        self.extraCard = extraCard
         self.characterName = "花木蘭"
         self.picture = "沒有圖片"
         atklv1 =  mulanATKSkill("沒有圖片", "", 1)
@@ -65,3 +119,5 @@ class mulan(character):
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)
+    def spendKIforDraw(self, g):
+        pass

@@ -86,6 +86,7 @@ class player:
                     "dayNightmareDrawRemind" : p.sleepingBeauty.dayNightmareDrawRemind,
                     "identity":p.alice.identity,
                     "KI_TOKEN":p.mulan.KI_TOKEN,
+                    "extraCard":p.mulan.extraCard,
                     "remindMatch":p.matchGirl.remindMatch,
                     "COMBO_TOKEN":p.dorothy.COMBO_TOKEN,
                     "canCombo":p.dorothy.canCombo,
@@ -302,6 +303,10 @@ class game:
         elif c == 1: # 白雪公主
             pass
         elif c == 2: # 睡美人
+            if self.players[target].identity.AWAKEN == 0:
+                self.players[target].identity.AWAKEN_TOKEN = \
+                    max(self.players[target].identity.AWAKEN_TOKEN,
+                        min(6,self.players[target].identity.AWAKEN_TOKEN+dam))
             pass
         elif c == 3: # 愛麗絲
             pass
@@ -334,7 +339,21 @@ class game:
         elif target == 4: # 花木蘭
             pass
         elif target == 5: # 輝夜姬
-            pass
+            self.nowid = 1-self.nowid
+            use = self.players[target].identity.useSpecialMove(self)
+            if use == 1:
+                card = self.players[target].identity.specialMove(self)
+                if self.players[target].hand[card] not in [1,2,3,10]:
+                    self.cheating()
+                if self.players[target].hand[card] == 10:
+                    lv = 1
+                else :
+                    lv = self.players[target].hand[card]
+                self.players[target].graveyard.append(self.players[target].hand[card])
+                del self.players[target].hand[card]
+                self.damage(1-target, 11, lv)
+                self.drawCard(target)
+            self.nowid = 1-self.nowid
         elif target == 6: # 美人魚
             pass
         elif target == 7: # 火柴女孩
@@ -349,6 +368,22 @@ class game:
                 return
         if(self.getRange()<=distanse):
             dam = atk - self.players[target].defense
+            if self.players[target].identity.idx == 4: # KI
+                self.nowid = 1-self.nowid
+                use = self.players[target].identity.askUseKI(self)
+                if use == 1:
+                    card = self.players[target].identity.useKI(self)
+                    if self.players[target].hand[card] not in [4,5,6,10]:
+                        self.cheating()
+                    if self.players[target].hand[card] == 10:
+                        lv = 1
+                    else :
+                        lv = self.players[target].hand[card]-3
+                    dam -= lv
+                    self.players[target].graveyard.append(self.players[target].hand[card])
+                    del self.players[target].hand[card]
+                self.nowid = 1-self.nowid
+            
             if dam <= 0:
                 self.players[target].identity.defense -= atk
             else:
@@ -408,7 +443,7 @@ class game:
         if bloc-aloc > 0:
             self.players[1-self.nowid].locate[1] = min(9, self.players[1-self.nowid].locate[1]+dis)
         elif bloc-aloc < 0:
-            self.players[1-self.nowid].locate[1] = max(9, self.players[1-self.nowid].locate[1]-dis)
+            self.players[1-self.nowid].locate[1] = max(1, self.players[1-self.nowid].locate[1]-dis)
         else:
             self.cheating()
         return
@@ -422,6 +457,18 @@ class game:
         top = self.players[target].deck[0]
         del self.players[target].deck[0]
         self.players[target].graveyard.append(top)
+        if top == 134:
+            eneragy = 1
+            for i in range(self.players[1-self.nowid].metamorphosis.SIZE):
+                if self.players[1-self.nowid].metamorphosis[i] in [166,167,168]:
+                    eneragy+=1
+            self.players[1-self.nowid].energy += eneragy
+        if top in [131, 132, 133]:
+            posion = top-131
+            for i in range(self.players[1-self.nowid].metamorphosis.SIZE):
+                if self.players[1-self.nowid].metamorphosis[i] == 142:
+                    posion+=1
+            self.lostLife( self.nowid, posion)
     def USEPOSION(self, g):
         s = self.status
         self.status = state.USE_POSION
@@ -477,7 +524,8 @@ class game:
             if c == 0:
                 break
             self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
-            self.nowDEF += (self.players[self.nowid].hand[c] - 3) if self.players[self.nowid].hand[c] not in [134, 10] else 1
+            if not (self.players[self.nowid].identity.idx == 2 and self.players[self.nowid].AWAKEN == 1):
+                self.nowDEF += (self.players[self.nowid].hand[c] - 3) if self.players[self.nowid].hand[c] not in [134, 10] else 1
             if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 2:
                 self.nowDEF += 1
             if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 3:
@@ -507,7 +555,7 @@ class game:
                 
             if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 1:
                 self.nowMOV -= 1
-            if self.players[self.nowid].hand[c] !=134:
+            if self.players[self.nowid].hand[c] != 134:
                 self.players[self.nowid].identity.energy+=(self.players[self.nowid].hand[c] - 6) if self.players[self.nowid].hand[c] not in [10] else 1
             del self.players[self.nowid].hand[c]
         self.status = s
@@ -515,7 +563,7 @@ class game:
         s = self.status
         self.status = state.USE_SKILL
         c = svr.connectBot(self.nowid, "int32_t", self)
-        skillC = [(self.players[self.nowid].identity.idx*12+11+j) for j in range(9)]
+        skillC = [(self.players[self.nowid].identity.idx*12+11+j) for j in range(12)]
         if c >= self.players[self.nowid].hand.SIZE or c < 0 or self.players[self.nowid].hand[c] not in skillC:
             # cheat
             self.cheating()

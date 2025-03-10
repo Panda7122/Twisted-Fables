@@ -1,13 +1,34 @@
+import sys 
+sys.path.append("..")
 from game import *
 from character import *
 class kaguyaATKSkill(atkCard):
     def skill(self, g:game, level):
+        defe = 1 if g.players[g.nowid].identity.defense >= 3 else 0
+        g.damage(1-g.nowid, 1,self.level+level+defe)
         pass
 class kaguyaDEFSkill(defCard):
     def skill(self, g:game, level):
+        g.players[g.nowid].identity.defense += level+self.level
+        g.players[g.nowid].identity.defense = min(g.players[g.nowid].identity.defense, g.players[g.nowid].identity.maxdefense)
+        waitingQueue = []
+        for i in range(level):
+            top = g.players[g.nowid].deck[0]
+            del g.players[g.nowid].deck[0]
+            if top in [4,5,6]:
+                g.players[g.nowid].hand.append(top)
+            else:
+                r = g.players[g.nowid].identity.droporKeepCard(top)
+                if r:
+                    waitingQueue.append(g, top)
+        for c in reversed(waitingQueue):
+            g.players[g.nowid].deck.insert(0, c)
+        
         pass
 class kaguyaMOVSkill(movCard):
     def skill(self, g:game, level):
+        g.damage(1-g.nowid, level, self.level)
+        g.players[g.nowid].identity.lostLiveRemoveCard(g)
         pass
 class kaguyaMETASkill(metaCard):
     def skill(self, g:game, level):
@@ -63,3 +84,29 @@ class kaguya(character):
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)
+    def useSpecialMove(self, g:game):
+        pass
+    def specialMove(self, g:game):
+        pass
+    def droporKeepCard(self, g:game, card):
+        uc = g.nowUsingCardID
+        s = g.status
+        g.status = state.KEEP_OR_BACK
+        ret = svr.connectBot(g.nowid, 'int8_t', g)
+        g.status = s
+        g.nowUsingCardID = uc
+        return ret
+    def lostLiveRemoveCard(self, g:game):
+        s = g.status
+        g.status = state.LOST_LIFE_FOR_REMOVECARD
+        ret = svr.connectBot(g.nowid, 'int8_t', g)
+        if ret == 1:
+            g.lostLife(g.nowid, 1)
+            where, c = g.chooseCardFromHandorGraveyard()
+            if where: # hand
+                del g.players[g.nowid].hand[c]
+            else: # graveyard
+                del g.players[g.nowid].graveyard[c]
+        elif ret != 0:
+            g.cheating()
+        g.status = s

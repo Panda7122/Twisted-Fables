@@ -1,3 +1,5 @@
+import sys 
+sys.path.append("..")
 from game import *
 from character import *
 class littleRedATKSkill(atkCard):
@@ -76,3 +78,5 @@ class littleRed(character):
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)
+    def specialMove(self, g:game):
+        g.cheating()

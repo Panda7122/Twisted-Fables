@@ -145,7 +145,8 @@ def initializeGame(g:game):
                 g.status = state.CHOOSE_IDENTITY
                 ident = svr.connectBot(g.nowid, 'int8_t', g)
                 if ident not in [1,2,3]:
-                    return -1
+                    g.cheating()
+
                 g.player[p].alice.identity = ident
                 pass
             elif c == 4: # 花木蘭
@@ -156,7 +157,8 @@ def initializeGame(g:game):
                 g.status = state.CHOOSE_TENTACLE_LOCATION
                 location = svr.connectBot(g.nowid, 'int32_t', g)
                 if location <1 or location > 9:
-                    return -1
+                    g.cheating()
+
                 g.tentacle_TOKEN_locate.append(location)
             elif c == 7: # 火柴女孩
                 pass
@@ -169,7 +171,8 @@ def initializeGame(g:game):
                         break
                 if len(g.players[p].specialDeck) == 3:
                     # error
-                    return -1
+                    g.cheating()
+
                 g.players[p].deck.append(card)
                 random.shuffle(g.players[p].deck)
                 
@@ -217,6 +220,14 @@ def main():
         while 1:
             # start phase
             settlementContinue(g)
+            if g.players[g.nowid].identity.idx == 3:
+                g.status = state.CHOOSE_IDENTITY
+                ident = svr.connectBot(g.nowid, 'int8_t', g)
+                if ident not in [1,2,3]:
+                    g.cheating()
+                if ident == g.player[g.nowid].alice.identity:
+                    g.cheating()
+                g.player[g.nowid].alice.identity = ident
             # clean phase
             for i in range(g.players[g.nowid].usecards.SIZE):
                 g.players[g.nowid].graveyard.append(g.players[g.nowid].usecards[i])
@@ -261,8 +272,8 @@ def main():
                 elif select == 2: # basic cards
                     # choose a basic card from hand
                     g.USEDEFBASIC()
-                    g.players[g.nowid].defense +=g.nowDEF
-                    g.players[g.nowid].defense = min(g.players[g.nowid].defense, g.players[g.nowid].maxdefense)
+                    g.players[g.nowid].identity.defense +=g.nowDEF
+                    g.players[g.nowid].identity.defense = min(g.players[g.nowid].defense, g.players[g.nowid].maxdefense)
                     g.nowDEF = 0
                 elif select == 3: # basic cards
                     # choose a basic card from hand
@@ -282,6 +293,9 @@ def main():
                 elif select == 4: # use a skill
                     # choose a skill card from hand
                     card = g.USESKILL()
+                    if (card-11)%12 >=9:
+                        g.cheating()
+                    g.nowUsingCardID = card
                     # if is dorothy
                     if g.players[g.nowid].identity.idx == 8 and g.players[g.nowid].dorothy.canCombo:
                         # ask combo
@@ -302,6 +316,13 @@ def main():
                     triggerCardSkill(g, g.nowUsingCardID, level)
                     g.nowUsingCardID = 0
                 elif select == 5: # TODO use a special card
+                    card = g.USESKILL()
+                    if (card-11)%12 < 9:
+                        g.cheating()
+                    
+                    g.nowUsingCardID = card
+                    triggerCardSkill(g, g.nowUsingCardID, 0)
+                    g.nowUsingCardID = 0
                     pass
                 elif select == 6: # buy a card
                     g.status = state.BUY_CARD_TYPE
@@ -341,7 +362,7 @@ def main():
                     triggerCardSkill(g, card, 0)
                     pass
                 elif select == 8: # TODO charactor special move
-                    
+                    g.players[g.nowid].identity.specialMove(g)
                     pass
                 elif select == 9: # drop poison
                     g.USEPOSION()
@@ -382,7 +403,11 @@ def main():
                     g.lostLife( g.nowid, posion)
             for i in range(g.players[g.nowid].hand.SIZE):
                 del g.players[g.nowid].hand[i]
-            for _ in range(6):
+            cardNum = 6
+            if g.players[g.nowid].identity.KI_TOKEN > 0 and g.players[g.nowid].identity.extraCard > 0:
+                add = g.players[g.nowid].identity.spendKIforDraw(g)
+                cardNum += add
+            for _ in range(cardNum):
                 g.drawCard(g.nowid)
             g.nowid = 1-g.nowid
     finally:    

@@ -1,3 +1,5 @@
+import sys 
+sys.path.append("..")
 from game import *
 from character import *
 class aliceATKSkill(atkCard):

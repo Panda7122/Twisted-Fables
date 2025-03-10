@@ -60,8 +60,9 @@ class Cplayer(cstruct.MemCStruct):
         struct CbuyDeck moveSkill;
         struct vector specialDeck;
         // Little Red Riding Hood 0
-        struct {
-        } redHood;
+        //struct {
+            
+        //} redHood;
 
         // Snow White 1
         struct {
@@ -89,12 +90,12 @@ class Cplayer(cstruct.MemCStruct):
         } mulan;
 
         // kaguya 5
-        struct {
-        } kaguya;
+        //struct {
+        //} kaguya;
 
         // mermaid 6
-        struct {
-        } mermaid;
+        //struct {
+        //} mermaid;
 
         // Match Girl 7
         struct {
@@ -104,18 +105,20 @@ class Cplayer(cstruct.MemCStruct):
         // dorothy 8
         struct {
             uint32_t COMBO_TOKEN;
-            bool canCombo;
+            int8_t canCombo;
         } dorothy;
 
         // Scheherazade 9
-        struct {
-        } scheherazade;
+        //struct {
+        //} scheherazade;
     };
     """
 
 class Cstate(cstruct.CEnum):
+    __size__ = 4
     __def__ = """
     enum state {
+        CHOOSE_IDENTITY,
         
     }
     """
@@ -133,7 +136,7 @@ class Cgame(cstruct.MemCStruct):
         uint32_t relic[11];
         struct vector relicDeck;
         struct vector relicGraveyard;
-        struct buyDeck basicBuyDeck[12];  // attack(0) LV1~3 defense(1) LV1~3 move(2) LV1~3 generic(3)
+        struct CbuyDeck basicBuyDeck[12];  // attack(0) LV1~3 defense(1) LV1~3 move(2) LV1~3 generic(3)
         enum Cstate status;
         // metadata (for using basic card)
         int32_t nowATK;

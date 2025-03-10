@@ -60,7 +60,7 @@ typedef struct _player {
     // Mulan 4
     struct {
         uint32_t KI_TOKEN;
-
+        uint8_t extraCard;
     } mulan;
 
     // kaguya 5
@@ -115,12 +115,18 @@ USEBASIC                      int32_t      for use skill card, choose basic card
 KNOCKBACK                     int32_t      knockback enemy distanse(hint:check avilable value on player's last use card)
 PUTTARGETPOSITION             int32_t      choose number of posion you want to push to target's deck(hint:check avilable value on player's last use card and skill that you used)
 SLEEPATKHERTSELF              int32_t      sleeping beauty's skill hert herself(hint:you can check the last card you use to avoid cheating)
+USEAWAKENTOKEN                int8_t       use awaken token when using skill(at most 3)
 CHOOSECARDS                   int32_t      choose a card from nowShowingCards(return card id)
 TAKE_TO_HAND                  int8_t       get card instead put it from graveyards (return 0 or 1)
 CHANGE_IDENTITY               int8_t       change identity or not(check last use card to check which you will change)(return 0:no or 1:yes)
 CHOOSE_MOVE_DIS               int8_t       choose the moving distanse(check last use card to confirm limit of move distanse)
-
-
+PUT_TO_ANOTHER_SIDE           int8_t       choose move target to another side or not
+CHOOSE_MOVE_NEARBY            int8_t       move to the locate next to target(-1:left, 1:right, 0:no move)
+KEEP_OR_BACK                  int8_t       keep the card or drop it(1:keep, 0:drop, the card store in nowusingCardID)
+LOST_LIFE_FOR_REMOVECARD      int8_t       kaguya's skill, (1:lost, 0:no)
+MOVE_TO_TANTACLE              int32_t      locate you choose(should in tentacle_TOKEN_locate or your original locate)
+CHOOSE_TANTACLE               int32_t      choose a tantacle
+MOVE_TANTACLE                 int32_t      move a tantacle you choose(locate after move tantacle)
 */
 typedef struct _game {
     player players[4];

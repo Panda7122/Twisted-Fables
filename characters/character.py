@@ -38,4 +38,6 @@ class character:
         return cls.__subclasses.get(idx)
     def setup():
         raise NotImplementedError
+    def specialMove(self, g):
+        raise NotImplementedError
         

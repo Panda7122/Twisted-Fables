@@ -1,14 +1,53 @@
+import sys 
+sys.path.append("..")
 from game import *
 from character import *
 class mermaidATKSkill(atkCard):
     def skill(self, g:game, level):
-        pass
+        dam =self.level+level
+        if g.players[1-g.nowid].locate in g.tentacle_TOKEN_locate:
+            dam +=self.level
+        if g.players[g.nowid].locate in g.tentacle_TOKEN_locate:
+            g.players[g.nowid].identity.energy+= 2
+        g.damage(1-g.nowid, self.level, self.level+level, dam)
 class mermaidDEFSkill(defCard):
     def skill(self, g:game, level):
+        if g.players[1-g.nowid].locate in g.tentacle_TOKEN_locate:
+            g.damage(1-g.nowid, 11, self.level+level, level)
+        s = g.status
+        g.status = state.MOVE_TO_TANTACLE
+        loc = svr.connectBot(g.nowid, 'int32_t', g)
+        if loc not in g.tentacle_TOKEN_locate+[g.players[g.nowid].locate]:
+            g.cheating()
+        g.players[g.nowid].locate = loc
+        g.players[g.nowid].identity.defense += self.level
+        g.players[g.nowid].identity.defense = min(g.players[g.nowid].identity.defense, g.players[g.nowid].identity.maxdefense)
+        g.status = s            
         pass
 class mermaidMOVSkill(movCard):
     def skill(self, g:game, level):
-        pass
+        g.players[g.nowid].identity.moveTantacle(level)
+        if g.players[g.nowid].locate in g.tentacle_TOKEN_locate:
+            for _ in range(self.level):
+                g.drawCard(g.nowid)
+        if self.level>1 and g.players[1-g.nowid].locate in g.tentacle_TOKEN_locate:
+            g.nowid = 1-g.nowid
+            id = g.dropCardFromHand()
+            g.players[g.nowid].graveyard.append(g.players[g.nowid].hand[id])
+            if g.players[g.nowid].hand[id] == 134:
+                eneragy = 1
+                for i in range(self.players[1-self.nowid].metamorphosis.SIZE):
+                    if self.players[1-self.nowid].metamorphosis[i] in [166,167,168]:
+                        eneragy+=1
+                self.players[1-self.nowid].energy += eneragy
+            if g.players[g.nowid].hand[id] in [131, 132, 133]:
+                posion = g.players[g.nowid].hand[id]-131
+                for i in range(self.players[1-self.nowid].metamorphosis.SIZE):
+                    if self.players[1-self.nowid].metamorphosis[i] == 142:
+                        posion+=1
+                self.lostLife( self.nowid, posion)    
+            del g.players[g.nowid].hand[id]
+            g.nowid = 1-g.nowid
 class mermaidMETASkill(metaCard):
     def skill(self, g:game, level):
         # TODO not implement yet
