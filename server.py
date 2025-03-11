@@ -120,7 +120,6 @@ def initializeGame(g:game):
             # 1,4,7 is lv1基本牌，take 3 for each player init deck
             for j in range(18 if i not in [1,4,7] else 12):  
                 g.basicBuyDeck[i].cards[j] = i+1
-            g.basicBuyDeck[i].destiny_TOKEN = 0 # for 山魯佐德's TOKEN
         # shuffle init_deck
         random.shuffle(g.players[0].deck)
         random.shuffle(g.players[1].deck)
@@ -133,6 +132,8 @@ def initializeGame(g:game):
             g.players[p].metamorphosis = []
         # charactor special rule
         for p in range(2):
+            if g.players[p].identity.idx == 9:
+                g.players[p].identity.destiny_TOKEN_locate = [] # for 山魯佐德's TOKEN
             g.nowid = p
             c = g.players[p].identity.idx
             if c == 0: # 小紅帽
@@ -185,15 +186,11 @@ def initializeGame(g:game):
                 for d in range(10):
                     g.basicBuyDeck[d].destiny_TOKEN=0
                 for _ in range(3):
-                    g.status = state.CHOOSE_SPECIAL_CARD
-                    gtmp = svr.connectBot(g.nowid, 'game', g)
-                    if gtmp.nowid != g.nowid:
+                    g.status = state.CHOOSE_DESTINY_TOKEN
+                    loc = svr.connectBot(g.nowid, 'int32_t', g)
+                    if loc not in [-1,-2,-3,1,2,3,4,5,6,7,8,9,10]:
                         g.cheating()
-                    if gtmp.countDestinyTOKEN() == g.countDestinyTOKEN()+1:
-                        g = gtmp
-                    else:
-                        # error
-                        g.cheating()
+                    g.players[g.nowid].identity.destiny_TOKEN_locate.append(loc)
         # draw card
         g.nowid = random.randint(0,1)
         for _ in range(4):
@@ -352,10 +349,11 @@ def main():
                         if g.players[g.nowid].identity.energy < pz:
                             g.cheating()
                         g.players[g.nowid].identity.energy -= pz
-                        cd = g.basicBuyDeck[ct-1][lv-1][-1]
-                        g.basicBuyDeck[ct-1][lv-1].pop()
+                        cd = g.basicBuyDeck[ct-1][lv-1][0]
+                        del g.basicBuyDeck[ct-1][lv-1][0]
                         g.players[g.nowid].graveyard.append(cd)
-                        if g.players[1-g.nowid].identity.idx == 9 and g.basicBuyDeck[ct-1][lv-1].destiny_TOKEN != 0:
+                        
+                        if g.players[1-g.nowid].identity.idx == 9 and (ct-1)*3+lv in  g.players[1-g.nowid].identity.destiny_TOKEN_locate != 0:
                             g.players[1-g.nowid].identity.triggerDestiny(g, (ct-1)*3+lv)
                 elif select == 7: # TODO metamorphosis
                     card = g.USESKILL()

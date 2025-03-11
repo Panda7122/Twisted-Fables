@@ -4,12 +4,33 @@ from game import *
 from character import *
 class dorothyATKSkill(atkCard):
     def skill(self, g:game, level):
+        if g.getRange()>1:
+            g.cheating()
+        beforeDis = g.getRange()
+        g.knockback(level)
+        afterDis = g.getRange()
+        X = level - (afterDis-beforeDis)
+        g.damage(1-g.nowid, 11, self.level + level+X)
         pass
 class dorothyDEFSkill(defCard):
     def skill(self, g:game, level):
+        cnt = 1
+        while(1):
+            drop = g.players[g.nowid].identity.dropCard(g)
+            if drop == -1:
+                break
+            cnt += 1
+            if g.players[g.nowid].hand[drop]not in [1,2,3,4,5,6,7,8,9,10]:
+                g.cheating()
+            g.players[g.nowid].graveyard.append(g.players[g.nowid].hand[drop])
+            del g.players[g.nowid].hand[drop]
+        for _ in range(cnt):
+            g.drawCard(g.nowid)
         pass
+    
 class dorothyMOVSkill(movCard):
     def skill(self, g:game, level):
+        g.damage(1-g.nowid,self.level+level, g.getRange()-1)
         pass
 class dorothyMETASkill(metaCard):
     def skill(self, g:game, level):
@@ -69,3 +90,13 @@ class dorothy(character):
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)
+    def dropCard(self, g:game):
+        s = self.status
+        g.status = state.DROP_CARD
+        ret = svr.connectBot(g.nowid, "int32_t", g)
+        if ret >= len(g.players[g.nowid].hand) or ret < 0:
+            # cheat
+            g.cheating()
+        ret -= 1
+        g.status = s
+        return ret

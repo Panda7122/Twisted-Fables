@@ -4,12 +4,61 @@ from game import *
 from character import *
 class scheherazadeATKSkill(atkCard):
     def skill(self, g:game, level):
-        pass
+        g.damage(1-g.nowid, self.level, self.level+level)
+        for i in range(self.level):
+            ret = g.players[g.nowid].identity.flipTOKEN(g)
+            if ret == 0:
+                break
 class scheherazadeDEFSkill(defCard):
     def skill(self, g:game, level):
-        pass
+        g.players[g.nowid].identity.defense+=level
+        g.players[g.nowid].identity.defense = min(g.players[g.nowid].identity.maxdefense, g.players[g.nowid].identity.defense)
+        for _ in range(self.level):
+            ret = g.players[g.nowid].identity.moveTOKEN(g)
+            if ret == 0:
+                break
+        
 class scheherazadeMOVSkill(movCard):
     def skill(self, g:game, level):
+        g.damage(1-g.nowid, self.level, self.level)
+        waiting_queue = []
+        for _ in range(level):
+            card = g.players[1-g.nowid].deck[0]
+            del g.players[1-g.nowid].deck[0]
+            if card <= 10:
+                loc = card
+            else:
+                loc = -(((card-11)%3)+1)
+            if loc in g.players[g.nowid].identity.destiny_TOKEN_locate:
+                for i in range(len(g.players[g.nowid].identity.destiny_TOKEN_locate)):
+                    if g.players[g.nowid].identity.destiny_TOKEN_locate[i] == loc and g.players[g.nowid].identity.destiny_TOKEN_type[i] == 1:
+                        g.players[g.nowid].identity.destiny_TOKEN_type[i] = 2
+                        break
+            c = g.nowUsingCardID
+            g.nowUsingCardID = card
+            s = g.status
+            g.status = state.KEEP_OR_BACK
+            ret = svr.connectBot(g.nowid, 'int8_t', g)
+            g.status = s
+            g.nowUsingCardID = c
+            if ret == 1:
+                waiting_queue.append(card)
+            else:
+                g.players[1-g.nowid].graveyard.append(card)
+                if card == 134:
+                    eneragy = 1
+                    for i in range(g.players[1-g.nowid].metamorphosis.SIZE):
+                        if g.players[1-g.nowid].metamorphosis[i] in [166,167,168]:
+                            eneragy+=1
+                    g.players[1-g.nowid].energy += eneragy
+                if card in [131, 132, 133]:
+                    posion = card-131
+                    for i in range(g.players[1-g.nowid].metamorphosis.SIZE):
+                        if g.players[1-g.nowid].metamorphosis[i] == 142:
+                            posion+=1
+                    g.lostLife( g.nowid, posion)
+        for c in reversed(waiting_queue):
+            g.players[1-g.nowid].deck.append(c)
         pass
 class scheherazadeMETASkill(metaCard):
     def skill(self, g:game, level):
@@ -29,8 +78,12 @@ class scheherazade(character):
         self.defense = 0
         self.energy = 0
         self.specialGate = 18
-    def __init__(self, **kwargs):
+        self.destiny_TOKEN_locate = []
+        self.destiny_TOKEN_type = []
+    def __init__(self, destiny_TOKEN_locate,destiny_TOKEN_type, **kwargs):
         self.setup()
+        self.destiny_TOKEN_locate = destiny_TOKEN_locate
+        self.destiny_TOKEN_type = destiny_TOKEN_type
         self.characterName = "山魯佐德"
         self.picture = "沒有圖片"
         atklv1 =  scheherazadeATKSkill("沒有圖片", "", 1)
@@ -65,3 +118,30 @@ class scheherazade(character):
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)
+    def flipTOKEN(self, g:game):
+        s = g.status
+        g.status = state.FLIP_TOKEN_TO_RED
+        loc = svr.connectBot(g.nowid, 'int8_t', g)
+        if loc not in [-1,-2, -3, 0, 1,2,3,4,5,6,7,8,9,10]:
+            g.cheating()
+        if loc<0:
+            if loc == -1:
+                if g.players[1-g.nowid].attackSkill.destiny_TOKEN  != 1:
+                    g.cheating()
+                g.players[1-g.nowid].attackSkill.destiny_TOKEN = 2
+            elif loc == -2:
+                if g.players[1-g.nowid].defenseSkill.destiny_TOKEN  != 1:
+                    g.cheating()
+                g.players[1-g.nowid].defenseSkill.destiny_TOKEN = 2
+            elif loc == -3:
+                if g.players[1-g.nowid].moveSkill.destiny_TOKEN  != 1:
+                    g.cheating()
+                g.players[1-g.nowid].moveSkill.destiny_TOKEN = 2
+        elif loc>0:
+            if g.basicBuyDeck[(loc-1)//3][(loc-1)%3].destiny_TOKEN  != 1:
+                g.cheating()
+            g.basicBuyDeck[(loc-1)//3][(loc-1)%3].destiny_TOKEN = 2
+        g.status = s
+        return loc
+    def moveTOKEN(self, g):
+        pass

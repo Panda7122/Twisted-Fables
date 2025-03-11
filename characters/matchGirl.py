@@ -4,13 +4,24 @@ from game import *
 from character import *
 class matchGirlATKSkill(atkCard):
     def skill(self, g:game, level):
+        cost = g.players[g.nowid].identity.spendEnergy(g)
+        g.damage(1-g.nowid, 1, self.level+level+(cost//3))
         pass
 class matchGirlDEFSkill(defCard):
     def skill(self, g:game, level):
-        pass
+        g.players[g.nowid].identity.defense += 1
+        g.players[g.nowid].identity.defense = min(g.players[g.nowid].identity.defense , g.players[g.nowid].identity.maxdefense)
+        lost = g.players[g.nowid].identity.spendLife(g)
+        g.lostLife(g.nowid, lost)
+        for _ in range(lost):
+            g.drawCard(g.nowid)
 class matchGirlMOVSkill(movCard):
     def skill(self, g:game, level):
-        pass
+        g.damage(1-g.nowid,self.level, self.level)
+        rec = g.players[g.nowid].identity.recycle_match(g, level)
+        g.players[g.nowid].identity.energy += self.level * rec
+        g.players[g.nowid].identity.life += (self.level-1) * rec
+        g.players[g.nowid].identity.life = min(g.players[g.nowid].identity.maxlife,g.players[g.nowid].identity.life)
 class matchGirlMETASkill(metaCard):
     def skill(self, g:game, level):
         # TODO not implement yet
@@ -67,3 +78,41 @@ class matchGirl(character):
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)
+    def spendEnergy(self, g:game):
+        s = g.status
+        g.status = state.SPEND_ENERGY
+        cost = svr.connectBot(g.nowid, 'int32_t', g)
+        if cost < 0 or cost > g.players[g.nowid].identity.energy:
+            g.cheating()
+        g.status = s
+        return cost
+    def spendLife(self, g:game):
+        s = g.status
+        g.status = state.SPEND_ENERGY
+        cost = svr.connectBot(g.nowid, 'int32_t', g)
+        if cost < 0 or cost > g.players[g.nowid].identity.life:
+            g.cheating()
+        g.status = s
+        return cost
+    def recycle_match(self, g:game, atmost):
+        count = 0
+        for i in range(len(g.players[1-g.nowid].graveyard)):
+            if g.players[1-g.nowid].graveyard[i] == 134:
+                count += 1
+        maxi = min(count, atmost)
+        s = g.status
+        g.status = state.RECYCLE_MATCH
+        cost = svr.connectBot(g.nowid, 'int32_t', g)
+        if cost < 0 or cost > maxi:
+            g.cheating()
+        g.status = s
+        idx = []
+        for i in range(len(g.players[1-g.nowid].graveyard)):
+            if len(idx) == cost:
+                break
+            if g.players[1-g.nowid].graveyard[i] == 134:
+                idx.append(i)
+        for i in reversed(idx):
+            del g.players[1-g.nowid].graveyard[i]
+        self.remindMatch += cost
+        return cost

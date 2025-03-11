@@ -10,14 +10,7 @@ from characters.character import *
 BASIC_PRIZE = [[1,3,6],[1,3,6],[1,3,6],[2]]
 SKILL_PRIZE = [[0,2,4],[0,2,4],[0,2,4]]
 @dataclasses.dataclass
-class buyDeck:
-    cards:list[int]
-    destiny_TOKEN:int
-    def to_CbuyDeck(self)->CbuyDeck:
-        return CbuyDeck(cards=vector.from_list(self.cards), destiny_TOKEN = self.destiny_TOKEN)
-    @classmethod
-    def from_CbuyDeck(cls, bd:CbuyDeck):
-        return cls(cards=bd.cards.to_list(), destiny_TOKEN = bd.destiny_TOKEN)
+
 @dataclasses.dataclass
 class player:
     team:int
@@ -28,9 +21,9 @@ class player:
     usecards:list[int]
     graveyard:list[int]
     metamorphosis:list[int]
-    attackSkill:buyDeck
-    defenseSkill:buyDeck
-    moveSkill:buyDeck
+    attackSkill:list[int]
+    defenseSkill:list[int]
+    moveSkill:list[int]
     ULTDeck:list[int]
     def to_Cplayer(self)->Cplayer:
         ret = Cplayer(team = self.team,
@@ -47,9 +40,9 @@ class player:
                 usecards = vector.from_list(self.usecards),
                 graveyard = vector.from_list(self.graveyard),
                 metamorphosis = vector.from_list(self.metamorphosis),
-                attackSkill = self.attackSkill.to_CbuyDeck(),
-                defenseSkill = self.defenseSkill.to_CbuyDeck(),
-                moveSkill = self.moveSkill.to_CbuyDeck(),
+                attackSkill = vector.from_list(self.attackSkill),
+                defenseSkill = vector.from_list(self.defenseSkill),
+                moveSkill = vector.from_list(self.moveSkill),
                 specialDeck = vector.from_list(self.ULTDeck),
                 )
         if self.identity.idx == 0:
@@ -64,6 +57,7 @@ class player:
             ret.alice.identity = self.identity.identity
         elif self.identity.idx == 4:
             ret.mulan.KI_TOKEN = self.identity.KI_TOKEN
+            ret.mulan.extraCard = self.identity.extraCard
         elif self.identity.idx == 5:
             pass
         elif self.identity.idx == 6:
@@ -90,6 +84,8 @@ class player:
                     "remindMatch":p.matchGirl.remindMatch,
                     "COMBO_TOKEN":p.dorothy.COMBO_TOKEN,
                     "canCombo":p.dorothy.canCombo,
+                    "destiny_TOKEN_locate":p.scheherazade.destiny_TOKEN_locate.to_list()
+                    "destiny_TOKEN_type":p.scheherazade.destiny_TOKEN_type.to_list()
                 })
         char.maxlife = p.maxlife
         char.life= p.life
@@ -106,9 +102,9 @@ class player:
             usecards = p.usecards.to_list(),
             graveyard = p.graveyard.to_list(),
             metamorphosis = p.metamorphosis.to_list(),
-            attackSkill = buyDeck.from_CbuyDeck(p.attackSkill),
-            defenseSkill = buyDeck.from_CbuyDeck(p.defenseSkill),
-            moveSkill = buyDeck.from_CbuyDeck(p.moveSkill),
+            attackSkill = p.attackSkill.to_list(),
+            defenseSkill = p.defenseSkill.to_list(),
+            moveSkill = p.moveSkill.to_list(),
             ULTDeck = p.specialDeck.to_list()
         )
     def buyATKCard(self, g:game):
@@ -195,7 +191,7 @@ class game:
     relic:list[int]
     relicDeck:list[int]
     relicGraveyard:list[int]
-    basicBuyDeck:list[list[buyDeck]]
+    basicBuyDeck:list[list[int]]
     status:state
     nowATK:int
     nowDEF:int
@@ -212,7 +208,7 @@ class game:
             relic = self.relic,
             relicDeck = vector.from_list(self.relicDeck),
             relicGraveyard = vector.from_list(self.relicGraveyard),
-            basicBuyDeck = list(map(buyDeck.to_CbuyDeck, [x for xs in self.basicBuyDeck for x in xs])),
+            basicBuyDeck = list(map(vector.from_list, [x for xs in self.basicBuyDeck for x in xs])),
             status = self.status,
             nowATK = self.nowATK,
             nowDEF = self.nowDEF,
@@ -222,7 +218,7 @@ class game:
         )
     @classmethod
     def from_Cgame(cls, cg:Cgame):
-        ls = list(map(buyDeck.from_CbuyDeck, cg.basicBuyDeck))
+        ls = list(map(vector.from_list, cg.basicBuyDeck))
         bbd = [[] for _ in range(4)]
         for i in range(4):
             for j in range(3):
@@ -263,16 +259,12 @@ class game:
             retg.players[0].hand[i] = -1
         return retg
     def getRange(self):
-        return abs(self.players[0].locate[1] - self.players[1].locate[1])
+        return abs(self.players[0].locate- self.players[1].locate)
     def countDestinyTOKEN(self):
-        ret = 0
-        ret += self.players[1-self.nowid].attackSkill.destiny_TOKEN
-        ret += self.players[1-self.nowid].defenseSkill.destiny_TOKEN
-        ret += self.players[1-self.nowid].moveSkill.destiny_TOKEN
-        for d in range(3):
-            for k in range(4):
-                ret += self.basicBuyDeck[d][k].destiny_TOKEN
-        return ret
+        if self.players[0].identity.idx == 9:
+            return len(self.players[0].identity.destiny_TOKEN_locate)
+        elif self.players[1].identity.idx == 9:
+            return len(self.players[1].identity.destiny_TOKEN_locate)
     def drawCard(self, target):
         if len(self.players[target].deck) == 0:
             for i in range(len(self.players[target].graveyard)):

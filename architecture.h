@@ -30,9 +30,9 @@ typedef struct _player {
     vector usecards;
     vector graveyard;
     vector metamorphosis;
-    buyDeck attackSkill;
-    buyDeck defenseSkill;
-    buyDeck moveSkill;
+    vector attackSkill;
+    vector defenseSkill;
+    vector moveSkill;
     vector specialDeck;
     // Little Red Riding Hood 0
     struct {
@@ -84,6 +84,8 @@ typedef struct _player {
 
     // Scheherazade 9
     struct {
+        vector destiny_TOKEN_locate;
+        vector destiny_TOKEN_type;
     } scheherazade;
 } player;
 enum state { CHOOSE_CARD_TO_USE };
@@ -92,7 +94,7 @@ state                         return type  meaning
 CHOOSE_IDENTITY               int8_t       1:紅心皇后 2:瘋帽子 3:柴郡貓
 CHOOSE_TENTACLE_LOCATION      int32_t      tentacle location
 CHOOSE_SPECIAL_CARD           int32_t      special card id
-CHOOSE_DESTINY_TOKEN          game         game status after set a DESTINY_TOKEN
+CHOOSE_DESTINY_TOKEN          int32_t      -1,-2,-3 meaning skill(atk/def/mov), 1~10 meaning basic(atk/def/mov/general) TODO MODIFY
 SET_TARGET_LOCATE_TO_NEARBY   int32_t      set location(1~9)
 CHOOSE_MOVE                   int32_t      choose moves
                                            (0:focus, 1-3:use basic cards(1:atk,2:def,3:mov),
@@ -127,6 +129,14 @@ LOST_LIFE_FOR_REMOVECARD      int8_t       kaguya's skill, (1:lost, 0:no)
 MOVE_TO_TANTACLE              int32_t      locate you choose(should in tentacle_TOKEN_locate or your original locate)
 CHOOSE_TANTACLE               int32_t      choose a tantacle
 MOVE_TANTACLE                 int32_t      move a tantacle you choose(locate after move tantacle)
+SPEND_ENERGY                  int32_t      spend energy for rise the atk(0 is meaning not use)
+SPEND_LIFE                    int32_t      spend life for draw card(0 is meaning not use)
+RECYCLE_MATCH                 int32_t      get back the match from target's graveyard(check the max value you can recycle from target's graveyard and the card you use)
+DROP_CARD                     int32_t      choose a card to drop(0 is end, 1 base)
+FLIP_TOKEN_TO_RED             int8_t       -1,-2,-3 meaning skill(atk/def/mov), 1~10 meaning basic(atk/def/mov/general), 0 is not flip
+CHOOSE_TOKEN
+TOKEN_GOAL
+
 */
 typedef struct _game {
     player players[4];
@@ -140,7 +150,7 @@ typedef struct _game {
     uint32_t relic[11];
     vector relicDeck;
     vector relicGraveyard;
-    buyDeck basicBuyDeck[4][3];  // attack(0) LV1~3 defense(1) LV1~3 move(2) LV1~3 generic(3)
+    vector basicBuyDeck[4][3];  // attack(0) LV1~3 defense(1) LV1~3 move(2) LV1~3 generic(3)
     enum state status;
     // metadata (for using basic card)
     int32_t nowATK;
