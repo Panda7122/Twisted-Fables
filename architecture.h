@@ -36,6 +36,7 @@ typedef struct _player {
     vector specialDeck;
     // Little Red Riding Hood 0
     struct {
+        int saveCard[3];
     } redHood;
 
     // Snow White 1
@@ -86,6 +87,7 @@ typedef struct _player {
     struct {
         vector destiny_TOKEN_locate;
         vector destiny_TOKEN_type;
+        int8_t selectToken;
     } scheherazade;
 } player;
 enum state { CHOOSE_CARD_TO_USE };
@@ -132,11 +134,12 @@ MOVE_TANTACLE                 int32_t      move a tantacle you choose(locate aft
 SPEND_ENERGY                  int32_t      spend energy for rise the atk(0 is meaning not use)
 SPEND_LIFE                    int32_t      spend life for draw card(0 is meaning not use)
 RECYCLE_MATCH                 int32_t      get back the match from target's graveyard(check the max value you can recycle from target's graveyard and the card you use)
-DROP_CARD                     int32_t      choose a card to drop(0 is end, 1 base)
+DROP_CARD                     int32_t      choose a card to drop/save(0 is end, 1 base)
 FLIP_TOKEN_TO_RED             int8_t       -1,-2,-3 meaning skill(atk/def/mov), 1~10 meaning basic(atk/def/mov/general), 0 is not flip
-CHOOSE_TOKEN
-TOKEN_GOAL
-
+CHOOSE_TOKEN                  int8_t       choose a destiny token for action(index of tokens, -1 is give up)
+TOKEN_GOAL                    int8_t       choose location of the token you choose for moving(-1,-2,-3 meaning skill(atk/def/mov), 1~10 meaning basic(atk/def/mov/general))
+GET_ULTRA                     int8_t       choose a special card to hand when your life lower than gate first time
+USE_METAMORPHOSIS             int32_t      trigger a active metamorphosis(return index of metamorphosis, 0 base)
 */
 typedef struct _game {
     player players[4];

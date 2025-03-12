@@ -9,7 +9,14 @@ from ctype import *
 from characters.character import *
 BASIC_PRIZE = [[1,3,6],[1,3,6],[1,3,6],[2]]
 SKILL_PRIZE = [[0,2,4],[0,2,4],[0,2,4]]
+
 @dataclasses.dataclass
+class lastAction:
+    atk:int = 0
+    defense:int = 0
+    mov:int = 0
+    useskill:list[tuple[int]] = []
+lastAct:lastAction
 
 @dataclasses.dataclass
 class player:
@@ -46,6 +53,7 @@ class player:
                 specialDeck = vector.from_list(self.ULTDeck),
                 )
         if self.identity.idx == 0:
+            ret.redHood.saveCard = vector.from_list(self.identity.saveCard)
             pass
         elif self.identity.idx == 1:
             ret.snowWhite.remindPosion = vector.from_list(self.identity.remindPosion)
@@ -72,6 +80,7 @@ class player:
     @classmethod
     def from_Cplayer(cls, p:Cplayer):
         char :character = character.getClass(p.character)(**{
+                    "saveCard" : p.snowWhite.saveCard.to_list(),
                     "remindPosion" : p.snowWhite.remindPosion.to_list(),
                     "AWAKEN_TOKEN" : p.sleepingBeauty.AWAKEN_TOKEN,
                     "AWAKEN" : p.sleepingBeauty.AWAKEN,
@@ -84,7 +93,7 @@ class player:
                     "remindMatch":p.matchGirl.remindMatch,
                     "COMBO_TOKEN":p.dorothy.COMBO_TOKEN,
                     "canCombo":p.dorothy.canCombo,
-                    "destiny_TOKEN_locate":p.scheherazade.destiny_TOKEN_locate.to_list()
+                    "destiny_TOKEN_locate":p.scheherazade.destiny_TOKEN_locate.to_list(),
                     "destiny_TOKEN_type":p.scheherazade.destiny_TOKEN_type.to_list()
                 })
         char.maxlife = p.maxlife
@@ -291,7 +300,7 @@ class game:
         #TODO done get Damage
         c = self.players[target].identity.idx
         if c == 0: # 小紅帽
-            pass
+           pass
         elif c == 1: # 白雪公主
             pass
         elif c == 2: # 睡美人
@@ -360,6 +369,32 @@ class game:
                 return
         if(self.getRange()<=distanse):
             dam = atk - self.players[target].defense
+            if self.players[target].identity.idx == 0: # little red
+                self.nowid = 1-self.nowid
+                X = 0
+                if 136 in self.players[target].metamorphosis:
+                    s = self.status
+                    us = self.nowUsingCardID
+                    self.nowUsingCardID = 135
+                    self.status = state.DROP_CARD
+                    drop = svr.connectBot(self.nowid, "int32_t", self)
+                    if drop > len(self.players[self.nowid].hand) or drop < 0:
+                        # cheat
+                        self.cheating()
+                    drop -= 1
+                    self.status = s
+                    if drop != -1:
+                        if self.players[self.nowid].hand[drop] in [20,21,22,1,2,3,4,5,6,7,8,9,10,131,132,133,134]:
+                            self.cheating()
+                        X = (self.players[self.nowid].hand[drop]-11)%3+1
+                        self.players[self.nowid].graveyard.append(self.players[self.nowid].hand[drop])
+                        del self.players[self.nowid].hand[drop]
+                    else:
+                        X=0
+                    self.nowUsingCardID = us
+                dam -= X
+                self.nowid = 1-self.nowid
+                
             if self.players[target].identity.idx == 4: # KI
                 self.nowid = 1-self.nowid
                 use = self.players[target].identity.askUseKI(self)

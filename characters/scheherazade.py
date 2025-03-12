@@ -143,5 +143,19 @@ class scheherazade(character):
             g.basicBuyDeck[(loc-1)//3][(loc-1)%3].destiny_TOKEN = 2
         g.status = s
         return loc
-    def moveTOKEN(self, g):
-        pass
+    def moveTOKEN(self, g:game):
+        s = g.status
+        g.status = state.CHOOSE_TOKEN
+        idx = svr.connectBot(g.nowid, 'int8_t', g)
+        if idx ==-1:
+            return 0
+        if idx <0 or idx >= len(self.destiny_TOKEN_locate):
+            g.cheating()
+        self.selectToken = idx
+        g.status = state.TOKEN_GOAL
+        loc = svr.connectBot(g.nowid, 'int8_t', g)
+        if loc not in [-1,-2,-3,1,2,3,4,5,6,7,8,9,10]:
+            g.cheating()
+        self.destiny_TOKEN_locate[idx] = loc
+        g.status = s
+        return 1

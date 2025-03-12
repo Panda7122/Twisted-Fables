@@ -30,7 +30,7 @@ class dorothyDEFSkill(defCard):
     
 class dorothyMOVSkill(movCard):
     def skill(self, g:game, level):
-        g.damage(1-g.nowid,self.level+level, g.getRange()-1)
+        g.damage(1-g.nowid,self.level+level, g.getRange()-1) # TODO confirm -1 or not
         pass
 class dorothyMETASkill(metaCard):
     def skill(self, g:game, level):

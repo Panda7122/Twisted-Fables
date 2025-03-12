@@ -123,7 +123,22 @@ class alice(character):
         if c not in canChoose:
             g.cheating()
         if c <= 10:
-            g.basicBuyDeck[(c-1)//3][(c-1)%3].cards.pop()
+            if len(g.basicBuyDeck[(c-1)//3][(c-1)%3]) == 0:
+                g.cheating()
+            del g.basicBuyDeck[(c-1)//3][(c-1)%3][0]
+        else:
+            if (c-11)%12 in [0,1,2]:
+                if len(g.players[g.nowid].attackSkill) == 0:
+                    g.cheating()
+                del g.players[g.nowid].attackSkill[0]
+            elif (c-11)%12 in [3,4,5]:
+                if len(g.players[g.nowid].defenseSkill) == 0:
+                    g.cheating()
+                del g.players[g.nowid].defenseSkill[0]
+            elif (c-11)%12 in [6,7,8]:
+                if len(g.players[g.nowid].moveSkill) == 0:
+                    g.cheating()
+                del g.players[g.nowid].moveSkill[0]
         flag = 0
         if (skillType == 1 and 147 in g.players[g.nowid].metamorphosis) or (skillType == 2 and 148 in g.players[g.nowid].metamorphosis):
             g.status = state.TAKE_TO_HAND

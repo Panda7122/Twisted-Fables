@@ -34,7 +34,7 @@ class snowWhiteMETASkill(metaCard):
         pass
 class snowWhiteUltraSkill(ultraCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
+        
         pass
 class snowWhite(character):
     def idx():

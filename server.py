@@ -265,12 +265,14 @@ def main():
                     dam = g.damage(1-g.nowid, 1, g.nowATK)
                     if g.players[g.nowid].identity.idx == 1 and dam >=2 and vectorHave(g.players[g.nowid].metamorphosis, [139]):
                         g.putPosion( 1-g.nowid)
+                    lastAct.atk = lastAction(g.nowATK,0, 0, [])
                     g.nowATK = 0
                 elif select == 2: # basic cards
                     # choose a basic card from hand
                     g.USEDEFBASIC()
                     g.players[g.nowid].identity.defense +=g.nowDEF
                     g.players[g.nowid].identity.defense = min(g.players[g.nowid].defense, g.players[g.nowid].maxdefense)
+                    lastAct.atk = lastAction(0, g.nowDEF, 0, [])
                     g.nowDEF = 0
                 elif select == 3: # basic cards
                     # choose a basic card from hand
@@ -286,6 +288,7 @@ def main():
                             g.putPosion( g.nowid)
                         elif g.players[g.nowid].identity.idx == 1 and vectorHave(g.players[1-g.nowid].metamorphosis, [141]):
                             g.putPosion( 1-g.nowid)
+                    lastAct.atk = lastAction(0, 0,g.nowMOV, [])
                     g.nowMOV = 0
                 elif select == 4: # use a skill
                     # choose a skill card from hand
@@ -334,7 +337,6 @@ def main():
                         if ct == -3:
                             g.players[g.nowid].buyMOVCard()
                     else:
-                        
                         if(ct == 4):
                             lv = 1
                         else:
@@ -342,7 +344,6 @@ def main():
                             lv = svr.connectBot(g.nowid, "int32_t", g)
                             if(lv not in [1,2,3]):
                                 g.cheating()
-                        
                         if len(g.basicBuyDeck[ct-1][lv-1]) == 0:
                             g.cheating()
                         pz = BASIC_PRIZE[ct-1][lv-1]
@@ -352,19 +353,32 @@ def main():
                         cd = g.basicBuyDeck[ct-1][lv-1][0]
                         del g.basicBuyDeck[ct-1][lv-1][0]
                         g.players[g.nowid].graveyard.append(cd)
-                        
                         if g.players[1-g.nowid].identity.idx == 9 and (ct-1)*3+lv in  g.players[1-g.nowid].identity.destiny_TOKEN_locate != 0:
                             g.players[1-g.nowid].identity.triggerDestiny(g, (ct-1)*3+lv)
                 elif select == 7: # TODO metamorphosis
-                    card = g.USESKILL()
-                    triggerCardSkill(g, card, 0)
-                    pass
+                    s = g.status
+                    g.status = state.USE_METAMORPHOSIS
+                    ret = svr.connectBot(g.nowid, 'int32_t', g)
+                    if ret <0 or ret >= len(g.players[g.nowid].metamorphosis):
+                        g.cheating()
+                    if g.players[g.nowid].identity.idx < 6:
+                        idx = (g.players[g.nowid].metamorphosis[ret]-135)%4
+                    elif g.players[g.nowid].identity.idx == 6:
+                        if g.players[g.nowid].metamorphosis[ret] <= 162:
+                            idx = (g.players[g.nowid].metamorphosis[ret]-135)%4
+                        else:
+                            idx = (g.players[g.nowid].metamorphosis[ret]-92)%3
+                    elif g.players[g.nowid].identity.idx == 7:
+                        idx = (g.players[g.nowid].metamorphosis[ret]-163)%6
+                    else:
+                        idx = (g.players[g.nowid].metamorphosis[ret]-169)%4
+                    g.players[g.nowid].identity.metamorphosisSkill[idx].skill(g, idx)
+                    g.status = s
                 elif select == 8: # TODO charactor special move
                     g.players[g.nowid].identity.specialMove(g)
                     pass
                 elif select == 9: # drop poison
                     g.USEPOSION()
-                    
                     pass
                 elif select == 10: # end
                     break
@@ -372,7 +386,7 @@ def main():
                     # cheat            
                     g.cheating()
                     pass
-                move = True
+                moved = True
                 if g.players[g.nowid].identity.idx == 8:
                     if select in [0,1,2,3,5,6]:
                         g.players[g.nowid].dorothy.canCombo = 0
