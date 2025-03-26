@@ -138,6 +138,7 @@ CHOOSECARDS                   int32_t      choose a card from nowShowingCards(re
 TAKE_TO_HAND                  int8_t       get card instead put it from graveyards (return 0 or 1)
 CHANGE_IDENTITY               int8_t       change identity or not(check last use card to check which you will change)(return 0:no or 1:yes)
 CHOOSE_MOVE_DIS               int8_t       choose the moving distanse(check last use card to confirm limit of move distanse)
+SEND_CARD                     int32_t      for sending card to target, choose hand or graveyard(negtive:graveyard, positive:hand, value:index of card, **1 base**, 0 is stop sending)
 
 GET_KI                        int32_t      get ki by drop defense card or general card(return index of card, **1 base**, 0 is meaning not use)
 SPEND_KI_FOR_ATK              int32_t      use ki for atk metamorphosis (return the number of KI you want to use)
@@ -154,6 +155,8 @@ MOVE_TARGET                   int8_t       kaguya's move metamorphosis(-1:left, 
 MOVE_TO_TANTACLE              int32_t      locate you choose(should in tentacle_TOKEN_locate or your original locate)
 CHOOSE_TANTACLE               int32_t      choose a tantacle
 MOVE_TANTACLE                 int32_t      move a tantacle you choose(locate after move tantacle)
+DROPCARD_MOVE_TANTACLE        int32_t      drop a card for moving tantacle(value:index of card, **1 base**)
+
 SPEND_ENERGY                  int32_t      spend energy for rise the atk(0 is meaning not use)
 SPEND_LIFE                    int32_t      spend life for draw card(0 is meaning not use)
 RECYCLE_MATCH                 int32_t      get back the match from target's graveyard(check the max value you can recycle from target's graveyard and the card you use)

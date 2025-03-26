@@ -122,8 +122,12 @@ class kaguya(character):
             g.lostLife(g.nowid, 1)
             where, c = g.chooseCardFromHandorGraveyard()
             if where: # hand
+                if g.players[g.nowid].hand[c] == 134:
+                    g.cheating()
                 del g.players[g.nowid].hand[c]
             else: # graveyard
+                if g.players[g.nowid].graveyard[c] == 134:
+                    g.cheating()
                 del g.players[g.nowid].graveyard[c]
         elif ret != 0:
             g.cheating()

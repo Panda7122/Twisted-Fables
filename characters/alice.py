@@ -75,6 +75,32 @@ class aliceUltraSkill(ultraCard):
             g.players[g.nowid].identity.havedrestart += 1
             if(g.players[g.nowid].identity.havedrestart>3):
                 g.cheating()
+        elif self.cardName == '遊戲盡在掌控':
+            g.damage(1-g.nowid, 3, 3)
+            for _ in range(5):
+                s = g.status
+                g.status = state.SEND_CARD
+                ret = svr.connectBot(g.nowid, "int32_t", self)
+                if ret == 0:
+                    break
+                sign = 1 if ret > 0 else 0
+                ret = abs(ret)-1
+                if sign:
+                    if ret >= len(g.players[g.nowid].hand):
+                        # cheat
+                        g.cheating()
+                else:
+                    if ret >= len(g.players[g.nowid].graveyard):
+                        # cheat
+                        g.cheating()
+                g.status = s
+                if sign == 1:
+                    g.players[1-g.nowid].deck.append(g.players[g.nowid].hand[ret])
+                    del g.players[g.nowid].hand[ret]
+                else:
+                    g.players[1-g.nowid].deck.append(g.players[g.nowid].graveyard[ret])
+                    del g.players[g.nowid].graveyard[ret]
+                random.shuffle(g.players[1-g.nowid].deck)
         pass
 class alice(character):
     def idx():

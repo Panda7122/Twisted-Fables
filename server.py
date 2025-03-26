@@ -34,7 +34,7 @@ def settlementContinue(g:game):
                 g.status = state.SET_TARGET_LOCATE_TO_NEARBY
                 loc = svr.connectBot(g.nowid, "int8_t", g)
                 g.status = s
-                if abs(g.players[g.nowid].locate[1] - loc) != 1 and g.players[1-g.nowid].locate[1] != loc:
+                if abs(g.players[g.nowid].locate - loc) != 1 and g.players[1-g.nowid].locate != loc:
                     # cheat
                     g.cheating()
                 g.setLocate(1-g.nowid, loc)
@@ -168,7 +168,7 @@ def initializeGame(g:game):
             elif c == 8: # 桃樂絲
                 g.status = state.CHOOSE_SPECIAL_CARD
                 card = svr.connectBot(g.nowid, 'int32_t', g)
-                for i in range(3):
+                for i in range(len(g.players[p].specialDeck[i])):
                     if g.players[p].specialDeck[i] == card:
                         del g.players[p].specialDeck[i]
                         break
@@ -264,8 +264,12 @@ def main():
                     if moved == False:
                         where, c = g.chooseCardFromHandorGraveyard()
                         if where: # hand
+                            if g.players[g.nowid].hand[c]  == 134:
+                                g.cheating()
                             del g.players[g.nowid].hand[c]
                         else: # graveyard
+                            if g.players[g.nowid].graveyard[c]  == 134:
+                                g.cheating()
                             del g.players[g.nowid].graveyard[c]
                         break
                     else:
@@ -284,12 +288,15 @@ def main():
                         g.players[g.nowid].identity.KI_TOKEN -= K
                             
                         g.nowATK += K
-                    dam = g.damage(1-g.nowid, 1, g.nowATK)
+                    if g.players[g.nowid].identity.idx == 6 and 159 in g.players[g.nowid].metamorphosis:
+                        dam = g.damage(1-g.nowid, 18, g.nowATK)
+                    else:
+                        dam = g.damage(1-g.nowid, 1, g.nowATK)
                     if g.players[g.nowid].identity.idx == 1 and dam >=2 and vectorHave(g.players[g.nowid].metamorphosis, [139]):
                         g.putPosion( 1-g.nowid)
                     lastAct.atk = lastAction(g.nowATK,0, 0, [])
                     g.nowATK = 0
-                elif select == 2: # basic cards
+                elif select == 2: # basic def cards
                     # choose a basic card from hand
                     g.USEDEFBASIC()
                     if g.players[g.nowid].identity.idx != 2 or g.players[g.nowid].identity.AWAKEN != 1: 
@@ -297,7 +304,7 @@ def main():
                         g.players[g.nowid].identity.defense = min(g.players[g.nowid].defense, g.players[g.nowid].maxdefense)
                     lastAct.atk = lastAction(0, g.nowDEF, 0, [])
                     g.nowDEF = 0
-                elif select == 3: # basic cards
+                elif select == 3: # basic mov cards
                     # choose a basic card from hand
                     g.USEMOVBASIC()
                     dir = g.chooseMovingDir()
@@ -321,7 +328,8 @@ def main():
                         elif g.players[g.nowid].identity.idx == 1 and vectorHave(g.players[g.nowid].metamorphosis, [141]):
                             g.putPosion( 1-g.nowid)
                     lastAct.atk = lastAction(0, 0,g.nowMOV, [])
-                        
+                    if g.players[g.nowid].identity.idx == 6 and 161 in g.players[g.nowid].metamorphosis:
+                        g.players[g.nowid].identity.moveTantacle(g, g.nowMOV//2, 0)
                     g.nowMOV = 0
                 elif select == 4: # use a skill
                     # choose a skill card from hand
@@ -483,12 +491,18 @@ def main():
                     g.lostLife( g.nowid, posion)
             for i in range(len(g.players[g.nowid].hand)):
                 del g.players[g.nowid].hand[i]
-            cardNum = 6
             if g.players[g.nowid].identity.idx == 2:
                 g.players[g.nowid].identity.usedmeta1 = 0
                 g.players[g.nowid].identity.usedmeta2 = 0
             elif g.players[g.nowid].identity.idx == 3:
                 g.players[g.nowid].identity.riseBasic = 0
+            elif g.players[g.nowid].identity.idx == 6:
+                if 92 in g.players[g.nowid].metamorphosis:
+                    g.players[g.nowid].identity.life += 2
+                    g.players[g.nowid].identity.life = min(g.players[g.nowid].identity.maxlife, g.players[g.nowid].identity.life)
+                if 93 in g.players[g.nowid].metamorphosis:
+                    g.lostLife(g.nowid, 1)
+            cardNum = 6
             if g.players[g.nowid].identity.idx == 4 and g.players[g.nowid].identity.KI_TOKEN > 0 and g.players[g.nowid].identity.extraCard > 0:
                 add = g.players[g.nowid].identity.spendKIforDraw(g)
                 if add > g.players[g.nowid].identity.extraCard or add < 0:

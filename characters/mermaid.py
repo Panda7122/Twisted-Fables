@@ -26,7 +26,7 @@ class mermaidDEFSkill(defCard):
         pass
 class mermaidMOVSkill(movCard):
     def skill(self, g:game, level):
-        g.players[g.nowid].identity.moveTantacle(level)
+        g.players[g.nowid].identity.moveTantacle(g, level, 1)
         if g.players[g.nowid].locate in g.tentacle_TOKEN_locate:
             for _ in range(self.level):
                 g.drawCard(g.nowid)
@@ -102,3 +102,34 @@ class mermaid(character):
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)
+    def specialMove(self, g:game):
+        s = g.status
+        g.status = state.DROPCARD_MOVE_TANTACLE
+        cid = svr.connectBot(g.nowid, 'int32_t', g)
+        if cid<1 or cid > len(g.players[g.nowid].hand):
+            g.cheating()
+        cid -= 1
+        if g.players[g.nowid].hand[cid] not in [7,8,9,10]:
+            g.cheating()
+        lv = g.players[g.nowid].hand[cid] - 6 if g.players[g.nowid].hand[cid] != 10 else 1
+        self.moveTantacle(g, lv, 0)
+        g.players[g.nowid].graveyard.append(g.players[g.nowid].hand[cid])
+        del g.players[g.nowid].hand[cid]
+        g.status = s
+    def moveTantacle(self, g:game, maxDis, minDis = 0):
+        s = g.status
+        g.status = state.CHOOSE_TANTACLE
+        t = svr.connectBot(g.nowid, 'int32_t', g)
+        if t >= len(g.tentacle_TOKEN_locate) or t < 0:
+            g.cheating()
+        
+        g.status = state.MOVE_TANTACLE
+        mov = svr.connectBot(g.nowid, 'int32_t', g)
+        if abs(mov-g.tentacle_TOKEN_locate[t]) > maxDis or abs(mov-g.tentacle_TOKEN_locate[t]) < minDis:
+            g.cheating()
+        if mov > 9 or mov < 1:
+            g.cheating()
+        g.tentacle_TOKEN_locate[t] = mov
+        if 94 in g.players[1-g.nowid].metamorphosis and g.tentacle_TOKEN_locate[t] == g.players[1-g.nowid].locate:
+            g.lostLife(1-g.nowid, 1)
+        g.status = s

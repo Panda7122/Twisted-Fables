@@ -150,7 +150,13 @@ class player:
                     self.identity.life += 5
                     self.identity.life = min(self.identity.maxlife, self.identity.life)
                 elif self.attackSkill.cards[0] == 146: # TODO 暗潮湧動
-                    pass
+                    s = g.status
+                    g.status = state.CHOOSE_TENTACLE_LOCATION
+                    loc = svr.connectBot(g.nowid, 'int32_t', g)
+                    if loc > 9 or loc < 1:
+                        g.cheating()
+                    g.tentacle_TOKEN_locate.append(loc)
+                    g.status = s
                 else: # TODO 童話編織者
                     pass
             else:
@@ -177,7 +183,13 @@ class player:
                     self.identity.life += 5
                     self.identity.life = min(self.identity.maxlife, self.identity.life)
                 elif self.defenseSkill.cards[0] == 146: # TODO 暗潮湧動
-                    pass
+                    s = g.status
+                    g.status = state.CHOOSE_TENTACLE_LOCATION
+                    loc = svr.connectBot(g.nowid, 'int32_t', g)
+                    if loc > 9 or loc < 1:
+                        g.cheating()
+                    g.tentacle_TOKEN_locate.append(loc)
+                    g.status = s
                 else: # TODO 童話編織者
                     pass
             else:
@@ -201,7 +213,13 @@ class player:
                     self.identity.life += 5
                     self.identity.life = min(self.identity.maxlife, self.identity.life)
                 elif self.moveSkill.cards[0] == 146: # TODO 暗潮湧動
-                    pass
+                    s = g.status
+                    g.status = state.CHOOSE_TENTACLE_LOCATION
+                    loc = svr.connectBot(g.nowid, 'int32_t', g)
+                    if loc > 9 or loc < 1:
+                        g.cheating()
+                    g.tentacle_TOKEN_locate.append(loc)
+                    g.status = s
                 else: # TODO 童話編織者
                     pass
             else:
@@ -317,6 +335,26 @@ class game:
             self.lose()
             pass
         self.players[target].life -= atk
+        if self.players[target].identity.life <= self.players[target].identity.specialGate:
+            self.status = state.CHOOSE_SPECIAL_CARD
+            card = svr.connectBot(self.nowid, 'int32_t', self)
+            for i in range(len(self.players[target].specialDeck[i])):
+                if self.players[target].specialDeck[i] == card:
+                    del self.players[target].specialDeck[i]
+                    break
+            remind = 3 if self.players[target].identity != 8 else 2
+            if len(self.players[target].specialDeck) >= remind:
+                # error
+                self.cheating()
+            if self.players[target].identity != 6:
+                self.players[target].hand.append(card)
+            else:
+                self.players[target].metamorphosis.append(card)
+                if card == 92:
+                    self.players[target].identity.maxlife = 18
+                elif card == 93:
+                    for i in range(len(self.tentacle_TOKEN_locate)):
+                        self.tentacle_TOKEN_locate[i] = self.players[target].locate
     def getDamage(self,target:int,  dam:int):
         #TODO done get Damage
         c = self.players[target].identity.idx
@@ -391,6 +429,14 @@ class game:
             if self.players[target].usecards[i] == 80:
                 return
         if(self.getRange()<=distanse):
+            if self.players[target].identity.idx == 6 and 93 in self.players[target].metamorphosis:
+                s = 0
+                for l in self.tentacle_TOKEN_locate:
+                    if l == self.players[target].locate:
+                        s += 1
+                atk -= s
+                if atk <= 0:
+                    return
             dam = atk - self.players[target].defense
             if self.players[target].identity.idx == 0: # little red
                 self.nowid = 1-self.nowid
@@ -435,7 +481,9 @@ class game:
                     self.players[target].graveyard.append(self.players[target].hand[card])
                     del self.players[target].hand[card]
                 self.nowid = 1-self.nowid
-            
+            if self.players[target].identity.idx == 6:
+                if self.players[target].locate in self.tentacle_TOKEN_locate:
+                    dam -= 1
             if dam <= 0:
                 self.players[target].identity.defense -= atk
             else:
@@ -460,8 +508,30 @@ class game:
                         self.players[self.nowid].identity.usedmeta2 = 1
                     self.status = s                    
                 self.getDamage(target, dam)
-                if self.players[self.nowid].usecards[-1] in [1,2,3] and dam>2 and self.players[self.nowid].identity.idx == 1:
-                    self.putPosion(target)
+                if self.players[self.nowid].identity.idx == 1:
+                    if 139 in self.players[self.nowid].metamorphosis:
+                        if self.players[self.nowid].usecards[-1] in [1,2,3] and dam>2:
+                            self.putPosion(target)
+                if self.players[target].identity.life <= self.players[target].identity.specialGate:
+                    self.status = state.CHOOSE_SPECIAL_CARD
+                    card = svr.connectBot(self.nowid, 'int32_t', self)
+                    for i in range(len(self.players[target].specialDeck[i])):
+                        if self.players[target].specialDeck[i] == card:
+                            del self.players[target].specialDeck[i]
+                            break
+                    remind = 3 if self.players[target].identity != 8 else 2
+                    if len(self.players[target].specialDeck) >= remind:
+                        # error
+                        self.cheating()
+                    if self.players[target].identity != 6:
+                        self.players[target].hand.append(card)
+                    else:
+                        self.players[target].metamorphosis.append(card)
+                        if card == 92:
+                            self.players[target].identity.maxlife = 18
+                        elif card == 93:
+                            for i in range(len(self.tentacle_TOKEN_locate)):
+                                self.tentacle_TOKEN_locate[i] = self.players[target].locate
         else:
             self.cheating()
         return dam
@@ -469,7 +539,7 @@ class game:
         if locate > 9 or locate < 1:
             # cheat
             self.cheating()                    
-        self.players[target].locate[1] = locate
+        self.players[target].locate = locate
     def chooseMove(self):
         s = self.status
         self.status = state.CHOOSE_MOVE
@@ -506,14 +576,19 @@ class game:
         self.status = s
         return ret
     def knockback(self, dis:int):
-        aloc = self.players[self.nowid].locate[1]
-        bloc = self.players[1-self.nowid].locate[1]
+        aloc = self.players[self.nowid].locate
+        bloc = self.players[1-self.nowid].locate
+        
         if bloc-aloc > 0:
-            self.players[1-self.nowid].locate[1] = min(9, self.players[1-self.nowid].locate[1]+dis)
+            self.players[1-self.nowid].locate = min(9, self.players[1-self.nowid].locate+dis)
         elif bloc-aloc < 0:
-            self.players[1-self.nowid].locate[1] = max(1, self.players[1-self.nowid].locate[1]-dis)
+            self.players[1-self.nowid].locate = max(1, self.players[1-self.nowid].locate-dis)
         else:
             self.cheating()
+        if bloc != self.players[1-self.nowid].locate:
+            for i in range(len(self.tentacle_TOKEN_locate)):
+                if 94 in self.players[1-self.nowid].metamorphosis and self.tentacle_TOKEN_locate[i] == self.players[1-self.nowid].locate:
+                    self.lostLife(1-self.nowid, 1)
         return
     def dropDeck(self, target:int):
         if len(self.players[target].deck) == 0:
@@ -560,6 +635,10 @@ class game:
             basicATK.append(4)
             basicATK.append(5)
             basicATK.append(6)
+        if self.players[self.nowid].identity.idx == 6 and 93 in self.players[self.nowid].metamorphosis:
+            basicATK.append(83)
+            basicATK.append(84)
+            basicATK.append(85)
         if self.players[1-self.nowid].identity.idx == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [166]):
             basicATK.append(134)
         while True:
@@ -602,7 +681,9 @@ class game:
                 self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
                 if self.players[self.nowid].hand[c] in [4,5,6]:
                     self.players[self.nowid].identity.useDefenseAsATK = 1
-                    self.nowATK += self.players[self.nowid].hand[c]-3
+                    self.nowATK += self.players[self.nowid].hand[c] - 3
+                elif self.players[self.nowid].hand[c] in [83, 84,85]:
+                    self.nowATK += self.players[self.nowid].hand[c] - 82
                 else:
                     self.nowATK += self.players[self.nowid].hand[c] if self.players[self.nowid].hand[c] not in [134, 10] else 1
                 if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 1:
@@ -622,6 +703,10 @@ class game:
         basicDEF = [4,5,6, 10]
         if self.players[1-self.nowid].identity.idx == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [167]):
             basicDEF.append(134)
+        if self.players[self.nowid].identity.idx == 6 and 93 in self.players[self.nowid].metamorphosis:
+            basicDEF.append(86)
+            basicDEF.append(87)
+            basicDEF.append(88)
         while True:
             if self.players[self.nowid].identity.idx == 2 and 143 in  self.players[self.nowid].metamorphosis and self.players[self.nowid].usedmeta1 == 0:
                 s = self.status
@@ -661,6 +746,8 @@ class game:
                     break
                 self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
                 if not (self.players[self.nowid].identity.idx == 2 and self.players[self.nowid].AWAKEN == 1):
+                    if self.players[self.nowid].hand[c] in [86, 87,88]:
+                        self.nowDEF += self.players[self.nowid].hand[c] - 85
                     self.nowDEF += (self.players[self.nowid].hand[c] - 3) if self.players[self.nowid].hand[c] not in [134, 10] else 1
                 if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 2:
                     self.nowDEF += 1
@@ -677,6 +764,10 @@ class game:
         basicMOV = [7,8,9, 10]
         if self.players[1-self.nowid].identity.idx == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [168]):
             basicMOV.append(134)
+        if self.players[self.nowid].identity.idx == 6 and 93 in self.players[self.nowid].metamorphosis:
+            basicMOV.append(89)
+            basicMOV.append(90)
+            basicMOV.append(91)
         while True:
             if self.players[self.nowid].identity.idx == 2 and 143 in  self.players[self.nowid].metamorphosis and self.players[self.nowid].usedmeta1 == 0:
                 s = self.status
@@ -707,6 +798,26 @@ class game:
                     self.players[self.nowid].usedmeta1 = 1
                 else:
                     self.cheating()
+            else:
+                c = svr.connectBot(self.nowid, "int32_t", self)
+                if c >= len(self.players[self.nowid].hand) or c < 0 or self.players[self.nowid].hand[c] not in basicMOV:
+                    # cheat
+                    self.cheating()
+                if c == 0:
+                    break
+                self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
+                if self.players[self.nowid].hand[c] in [89, 90,91]:
+                    self.nowMOV += self.players[self.nowid].hand[c] - 88
+                else:
+                    self.nowMOV += (self.players[self.nowid].hand[c] - 6) if self.players[self.nowid].hand[c] not in [134, 10] else 1
+                if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 3:
+                    self.nowMOV += 1
+                    
+                if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 1:
+                    self.nowMOV -= 1
+                if self.players[self.nowid].hand[c] != 134:
+                    self.players[self.nowid].identity.energy+=(self.players[self.nowid].hand[c] - 6) if self.players[self.nowid].hand[c] not in [10] else 1
+                del self.players[self.nowid].hand[c]
         self.status = s
     def USESKILL(self):
         s = self.status
@@ -757,7 +868,7 @@ class game:
     def moveCharacter(self, dir:int, dis:int):
         dif = (dir*2-1)*dis
         ret = False
-        while self.players[self.nowid].locate[1]+dif >9 or self.players[self.nowid].locate[1]+dif<1:
+        while self.players[self.nowid].locate+dif >9 or self.players[self.nowid].locate+dif<1:
             dis -=1
             dif = (dir*2-1)*dis
         if self.getRange()==dis:
@@ -765,7 +876,11 @@ class game:
             dif = (dir*2-1)*dis
         elif self.getRange()>dis:
             ret = True
-        self.players[self.nowid].locate[1]+=dif
+        self.players[self.nowid].locate+=dif
+        if dif != 0:
+            for i in range(len(self.tentacle_TOKEN_locate)):
+                if 94 in self.players[1-self.nowid].metamorphosis and self.tentacle_TOKEN_locate[i] == self.players[1-self.nowid].locate:
+                    self.lostLife(1-self.nowid, 1)
         return ret
     def putPosion(self, target):
         if len(self.players[1-target].identity.remindPosion) == 0:
@@ -785,9 +900,9 @@ class game:
         loc = svr.connectBot(self.nowid, "int32_t", self)
         card = self.getlastcard()
         if card in [29,30,31]:
-            if loc not in [self.players[self.nowid].locate[1]+1, self.players[self.nowid].locate[1]-1] or loc<1 or loc>9:
+            if loc not in [self.players[self.nowid].locate+1, self.players[self.nowid].locate-1] or loc<1 or loc>9:
                 self.cheating()
-        self.nowTarget.locate[1] = loc
+        self.players[1-self.nowid].locate = loc
 def vectorHave(vec:list, ls:list):
     for i in range(len(vec)):
         if vec[i] in ls:
