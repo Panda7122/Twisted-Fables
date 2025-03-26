@@ -41,8 +41,12 @@ class sleepingBeautyMETASkill(metaCard):
         pass
 class sleepingBeautyUltraSkill(ultraCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
-        pass
+        if self.cardName == '喚醒沉睡':
+            g.players[g.nowid].identity.AWAKEN_TOKEN += 3
+            self.AWAKEN = 1
+        elif self.cardName == '血脈重鑄':
+            g.players[g.nowid].identity.life += g.players[g.nowid].identity.AWAKEN_TOKEN
+            g.players[g.nowid].identity.life = min(g.players[g.nowid].identity.life, g.players[g.nowid].identity.maxlife)
 class sleepingBeauty(character):
     def idx():
         return 2
@@ -58,13 +62,17 @@ class sleepingBeauty(character):
         self.dayNightmareDrawRemind = 0
         self.atkRise = 0
         self.atkRiseTime = 0
-    def __init__(self, AWEAKEN = 0, AWAKEN_TOKEN = 0, dayNightmareDrawRemind = 0, atkRise = 0, atkRiseTime = 0, **kwargs):
+        self.usedmeta1 = 0
+        self.usedmeta2 = 0
+    def __init__(self, AWEAKEN = 0, AWAKEN_TOKEN = 0, dayNightmareDrawRemind = 0, atkRise = 0, atkRiseTime = 0, usedmeta1 = 0, usedmeta2 = 0, **kwargs):
         self.setup()
         self.AWAKEN_TOKEN = AWAKEN_TOKEN
         self.AWAKEN = AWEAKEN
         self.dayNightmareDrawRemind = dayNightmareDrawRemind
         self.atkRise = atkRise
         self.atkRiseTime = atkRiseTime
+        self.usedmeta1 = usedmeta1
+        self.usedmeta2 = usedmeta2
         self.characterName = "睡美人"
         self.picture = "沒有圖片"
         atklv1 =  sleepingBeautyATKSkill("沒有圖片", "", 1)

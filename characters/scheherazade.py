@@ -47,13 +47,13 @@ class scheherazadeMOVSkill(movCard):
                 g.players[1-g.nowid].graveyard.append(card)
                 if card == 134:
                     eneragy = 1
-                    for i in range(g.players[1-g.nowid].metamorphosis.SIZE):
+                    for i in range(len(g.players[1-g.nowid].metamorphosis)):
                         if g.players[1-g.nowid].metamorphosis[i] in [166,167,168]:
                             eneragy+=1
                     g.players[1-g.nowid].energy += eneragy
                 if card in [131, 132, 133]:
                     posion = card-131
-                    for i in range(g.players[1-g.nowid].metamorphosis.SIZE):
+                    for i in range(len(g.players[1-g.nowid].metamorphosis)):
                         if g.players[1-g.nowid].metamorphosis[i] == 142:
                             posion+=1
                     g.lostLife( g.nowid, posion)

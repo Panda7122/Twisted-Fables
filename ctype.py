@@ -76,6 +76,7 @@ class Cplayer(cstruct.MemCStruct):
             int8_t dayNightmareDrawRemind;
             int32_t atkRise;
             int32_t atkRiseTime;
+            int8_t usedmeta1;
         } sleepingBeauty;
 
         // alice 3
@@ -143,6 +144,7 @@ class Cgame(cstruct.MemCStruct):
         int32_t nowDEF;
         int32_t nowMOV;
         int32_t nowUsingCardID;
+        int32_t totalDamage;
     };
     """
     @property

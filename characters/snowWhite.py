@@ -19,8 +19,26 @@ class snowWhiteDEFSkill(defCard):
         s = g.status
         g.status = state.PUTTARGETPOSITION
         p = svr.connectBot(g.nowid, 'int32_t', g)
+        use = 0
         for _ in range(p):
-            g.putPosion(1-g.nowid)
+            if not use:
+                s = g.status
+                g.status = state.SHUFFLEPOSIONTODECK
+                ask = svr.connectBot(g.nowid, 'int8_t', g)
+                if ask not in [0,1]:
+                    g.cheating()
+                g.status = s
+                if ask == 1:
+                    use = 1
+            else :
+                ask = 0
+            if not ask:
+                g.putPosion(1-g.nowid)
+            else:
+                now = g.players[g.nowid].identity.remindPosion[0]
+                del g.players[g.nowid].identity.remindPosion[0]
+                g.players[1-g.nowid].deck.append(now)
+                random.shuffle(g.players[1-g.nowid].deck)
         g.status = s
 class snowWhiteMOVSkill(movCard):
     def skill(self, g:game, level):
@@ -34,8 +52,46 @@ class snowWhiteMETASkill(metaCard):
         pass
 class snowWhiteUltraSkill(ultraCard):
     def skill(self, g:game, level):
-        
-        pass
+        if self.cardName == "七蛇之怒":
+            if g.getRange()>1:
+                g.cheating()
+            count = sum(1 for card in g.players[1-g.nowid].graveyard if card in [131, 132, 133])
+            g.lostLife(1-g.nowid, count)
+        elif self.cardName =="魔鏡之雨":
+            g.damage(1-g.nowid, 1, 3)
+            for _ in range(len(g.players[1-g.nowid].hand)):
+                id = 0
+                g.players[1-g.nowid].graveyard.append(g.players[1-g.nowid].hand[id])
+                if g.players[1-g.nowid].hand[id] == 134:
+                    eneragy = 1
+                    for i in range(len(self.players[self.nowid].metamorphosis)):
+                        if self.players[1-self.nowid].metamorphosis[i] in [166,167,168]:
+                            eneragy+=1
+                    self.players[self.nowid].energy += eneragy
+                if g.players[1-g.nowid].hand[id] in [131, 132, 133]:
+                    posion = g.players[1-g.nowid].hand[id]-131
+                    for i in range(len(self.players[self.nowid].metamorphosis)):
+                        if self.players[self.nowid].metamorphosis[i] == 142:
+                            posion+=1
+                    self.lostLife( self.nowid, posion)    
+                del g.players[1-g.nowid].hand[id]
+            for _ in range(4):
+                g.drawCard(1-g.nowid)
+        elif self.cardName =="醞釀之災":
+            cnt = 0
+            for _ in range(3):
+                g.status = state.CHOOSE_CARD_BACK
+                id = svr.connectBot(g.nowid, 'int32_t', g)
+                if id == 0:
+                    break
+                id -= 1
+                if id<0 or id>= len(g.players[1-g.nowid].graveyard):
+                    g.cheating()
+                cnt += 1
+                g.players[1-g.nowid].deck.append(g.players[1-g.nowid].graveyard[id])
+                del g.players[1-g.nowid].graveyard[id]
+            if cnt > 0:
+                random.shuffle(g.players[1-g.nowid].deck)
 class snowWhite(character):
     def idx():
         return 1

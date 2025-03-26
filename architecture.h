@@ -51,6 +51,7 @@ typedef struct _player {
         int8_t dayNightmareDrawRemind;
         int32_t atkRise;
         int32_t atkRiseTime;
+        int8_t usedmeta1;
     } sleepingBeauty;
 
     // alice 3
@@ -117,9 +118,16 @@ USE_SKILL                     int32_t      for use skill card, choose hand(value
 TRIGGER_COMBO                 int8_t       0:NO 1:YES(you dont need to implement this if you didn't implement dorothy)
 USEBASIC                      int32_t      for use skill card, choose basic card from hand(value:index of card, **1 base**)
 KNOCKBACK                     int32_t      knockback enemy distanse(hint:check avilable value on player's last use card)
+
 PUTTARGETPOSITION             int32_t      choose number of posion you want to push to target's deck(hint:check avilable value on player's last use card and skill that you used)
+SHUFFLEPOSIONTODECK           int8_t       shuffle posion to deck instead of put into graveyard(1:yes, 0:no)
+CHOOSE_CARD_BACK              int32_t      shuffle back the target card from graveyard to deck(0:cancel, value:index of card, **1 base**)
+
 SLEEPATKHERTSELF              int32_t      sleeping beauty's skill hert herself(hint:you can check the last card you use to avoid cheating)
 USEAWAKENTOKEN                int8_t       use awaken token when using skill(at most 3)
+LOST_LIFE_FOR_USESKILL        int8_t       sleeping beauty's metamorphosis, (choose lose 0(not trigger),2,4,6 life)
+RECYCLE_CARD                  int32_t      sleeping beauty's metamorphosis, (choose a card from graveyard(0 is not trigger, 1 base))
+
 CHOOSECARDS                   int32_t      choose a card from nowShowingCards(return card id)
 TAKE_TO_HAND                  int8_t       get card instead put it from graveyards (return 0 or 1)
 CHANGE_IDENTITY               int8_t       change identity or not(check last use card to check which you will change)(return 0:no or 1:yes)
@@ -161,6 +169,7 @@ typedef struct _game {
     int32_t nowMOV;
     int32_t nowUsingCardID;
     vector nowShowingCards;
+    int32_t totalDamage;
 } game;
 
 #endif

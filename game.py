@@ -61,6 +61,8 @@ class player:
             ret.sleepingBeauty.AWAKEN_TOKEN = self.identity.AWAKEN_TOKEN
             ret.sleepingBeauty.AWAKEN = self.identity.AWAKEN
             ret.sleepingBeauty.dayNightmareDrawRemind = self.identity.dayNightmareDrawRemind
+            ret.sleepingBeauty.usedmeta1 = self.identity.usedmeta1
+            ret.sleepingBeauty.usedmeta2 = self.identity.usedmeta2
         elif self.identity.idx == 3:
             ret.alice.identity = self.identity.identity
         elif self.identity.idx == 4:
@@ -86,6 +88,8 @@ class player:
                     "AWAKEN" : p.sleepingBeauty.AWAKEN,
                     "atkRise":p.sleepingBeauty.atkRise,
                     "atkRiseTime":p.sleepingBeauty.atkRiseTime,
+                    "usedmeta1":p.sleepingBeauty.usedmeta1,
+                    "usedmeta2":p.sleepingBeauty.usedmeta2,
                     "dayNightmareDrawRemind" : p.sleepingBeauty.dayNightmareDrawRemind,
                     "identity":p.alice.identity,
                     "KI_TOKEN":p.mulan.KI_TOKEN,
@@ -207,6 +211,7 @@ class game:
     nowMOV:int
     nowUsingCardID:int
     nowShowingCards:list[int]
+    totalDamage:int
     def to_Cgame(self)->Cgame:
         return Cgame(
             players = list(map(player.to_Cplayer, self.players)),
@@ -223,7 +228,8 @@ class game:
             nowDEF = self.nowDEF,
             nowMOV = self.nowMOV,
             nowUsingCardID = self.nowUsingCardID,
-            nowShowingCards =vector.from_list(self.nowShowingCards)
+            nowShowingCards =vector.from_list(self.nowShowingCards),
+            totalDamage = self.totalDamage
         )
     @classmethod
     def from_Cgame(cls, cg:Cgame):
@@ -247,7 +253,8 @@ class game:
             nowDEF = cg.nowDEF,
             nowMOV = cg.nowMOV,
             nowUsingCardID = cg.nowUsingCardID,
-            nowShowingCards = cg.nowShowingCards.to_list()
+            nowShowingCards = cg.nowShowingCards.to_list(),
+            totalDamage = cg.totalDamage
         )
     def lose(self):
         for p in range(2):
@@ -308,6 +315,8 @@ class game:
                 self.players[target].identity.AWAKEN_TOKEN = \
                     max(self.players[target].identity.AWAKEN_TOKEN,
                         min(6,self.players[target].identity.AWAKEN_TOKEN+dam))
+                if self.players[target].identity.AWAKEN_TOKEN == 6:
+                    self.players[target].identity.AWAKEN = 1
             pass
         elif c == 3: # 愛麗絲
             pass
@@ -364,7 +373,7 @@ class game:
         elif target == 9: # 山魯佐德
             pass
     def damage(self, target:int,  distanse:int, atk:int):
-        for i in range(self.players[target].usecards.SIZE):
+        for i in range(len(self.players[target].usecards)):
             if self.players[target].usecards[i] == 80:
                 return
         if(self.getRange()<=distanse):
@@ -420,7 +429,23 @@ class game:
                     # target lose
                     self.lose()
                 self.players[target].identity.life -= dam
+                self.totalDamage += dam
+                if self.players[self.nowid].identity.idx == 2 and 144 in self.players[self.nowid].metamorphosis and self.players[self.nowid].identity.usedmeta2 == 0:
+                    s = self.status
+                    self.status = state.RECYCLE_CARD
+                    ret = svr.connectBot(self.nowid, 'int32_t', self)
+                    if ret != 0:
+                        ret -=1
+                        if ret >= len(self.players[self.nowid].graveyard) or ret < 0:
+                            self.cheating()
+                        card = self.players[self.nowid].graveyard[ret]
+                        del self.players[self.nowid].graveyard[ret]
+                        self.players[self.nowid].hand.append(card)
+                        self.players[self.nowid].identity.usedmeta2 = 1
+                    self.status = s                    
                 self.getDamage(target, dam)
+                if self.players[self.nowid].usecards[-1] in [1,2,3] and dam>2 and self.players[self.nowid].identity.idx == 1:
+                    self.putPosion(target)
         else:
             self.cheating()
         return dam
@@ -445,11 +470,11 @@ class game:
         sign = 1 if ret > 0 else 0
         ret = abs(ret)-1
         if sign:
-            if ret >= self.players[self.nowid].hand.SIZE:
+            if ret >= len(self.players[self.nowid].hand):
                 # cheat
                 self.cheating()
         else:
-            if ret >= self.players[self.nowid].graveyard.SIZE:
+            if ret >= len(self.players[self.nowid].graveyard):
                 # cheat
                 self.cheating()
         self.status = s
@@ -486,13 +511,13 @@ class game:
         self.players[target].graveyard.append(top)
         if top == 134:
             eneragy = 1
-            for i in range(self.players[1-self.nowid].metamorphosis.SIZE):
+            for i in range(len(self.players[1-self.nowid].metamorphosis)):
                 if self.players[1-self.nowid].metamorphosis[i] in [166,167,168]:
                     eneragy+=1
             self.players[1-self.nowid].energy += eneragy
         if top in [131, 132, 133]:
             posion = top-131
-            for i in range(self.players[1-self.nowid].metamorphosis.SIZE):
+            for i in range(len(self.players[1-self.nowid].metamorphosis)):
                 if self.players[1-self.nowid].metamorphosis[i] == 142:
                     posion+=1
             self.lostLife( self.nowid, posion)
@@ -518,23 +543,37 @@ class game:
         if self.players[1-self.nowid].identity.idx == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [166]):
             basicATK.append(134)
         while True:
-            c = svr.connectBot(self.nowid, "int32_t", self)
-            if c >= len(self.players[self.nowid].hand) or c < 0 or self.players[self.nowid].hand[c] not in basicATK:
-                # cheat
-                self.cheating()
-            if c == 0:
-                break
+            if self.players[self.nowid].identity.idx == 2 and 143 in  self.players[self.nowid].metamorphosis and self.players[self.nowid].usedmeta1 == 0:
+                s = self.status
+                self.status = state.LOST_LIFE_FOR_USESKILL
+                ret = svr.connectBot(self.nowid, 'int8_t', game)
+                self.status = s
+                if ret == 0:
+                    c = svr.connectBot(self.nowid, "int32_t", self)
+                    if c >= len(self.players[self.nowid].hand) or c < 0 or self.players[self.nowid].hand[c] not in basicATK:
+                        # cheat
+                        self.cheating()
+                    if c == 0:
+                        break
+                    self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
+                    self.nowATK += self.players[self.nowid].hand[c] if self.players[self.nowid].hand[c] not in [134, 10] else 1
+                    if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 1:
+                        self.nowATK += 1
+                        
+                    if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 2:
+                        self.nowATK -= 1
+                    if self.players[self.nowid].hand[c] !=134:
+                        self.players[self.nowid].identity.energy+=self.players[self.nowid].hand[c] if self.players[self.nowid].hand[c] not in [10] else 1
+                    del self.players[self.nowid].hand[c]
+                elif ret in [2,4,6]:
+                    self.lostLife(self.nowid, ret)
+                    level = ret//2
+                    self.nowATK += level
+                    self.players[self.nowid].usedmeta1 = 1
+                else:
+                    self.cheating()
             
-            self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
-            self.nowATK += self.players[self.nowid].hand[c] if self.players[self.nowid].hand[c] not in [134, 10] else 1
-            if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 1:
-                self.nowATK += 1
-                
-            if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 2:
-                self.nowATK -= 1
-            if self.players[self.nowid].hand[c] !=134:
-                self.players[self.nowid].identity.energy+=self.players[self.nowid].hand[c] if self.players[self.nowid].hand[c] not in [10] else 1
-            del self.players[self.nowid].hand[c]
+            
         self.status = s
     def USEDEFBASIC(self):
         s = self.status
@@ -544,22 +583,36 @@ class game:
         if self.players[1-self.nowid].identity.idx == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [167]):
             basicDEF.append(134)
         while True:
-            c = svr.connectBot(self.nowid, "int32_t", self)
-            if c >= self.players[self.nowid].hand.SIZE or c < 0 or self.players[self.nowid].hand[c] not in basicDEF:
-                # cheat
-                self.cheating()
-            if c == 0:
-                break
-            self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
-            if not (self.players[self.nowid].identity.idx == 2 and self.players[self.nowid].AWAKEN == 1):
-                self.nowDEF += (self.players[self.nowid].hand[c] - 3) if self.players[self.nowid].hand[c] not in [134, 10] else 1
-            if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 2:
-                self.nowDEF += 1
-            if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 3:
-                self.nowDEF -= 1
-            if self.players[self.nowid].hand[c] !=134:
-                self.players[self.nowid].identity.energy+=(self.players[self.nowid].hand[c] - 3) if self.players[self.nowid].hand[c] not in [10] else 1
-            del self.players[self.nowid].hand[c]
+            if self.players[self.nowid].identity.idx == 2 and 143 in  self.players[self.nowid].metamorphosis and self.players[self.nowid].usedmeta1 == 0:
+                s = self.status
+                self.status = state.LOST_LIFE_FOR_USESKILL
+                ret = svr.connectBot(self.nowid, 'int8_t', game)
+                self.status = s
+                if ret == 0:
+                    c = svr.connectBot(self.nowid, "int32_t", self)
+                    if c >= len(self.players[self.nowid].hand) or c < 0 or self.players[self.nowid].hand[c] not in basicDEF:
+                        # cheat
+                        self.cheating()
+                    if c == 0:
+                        break
+                    self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
+                    if not (self.players[self.nowid].identity.idx == 2 and self.players[self.nowid].AWAKEN == 1):
+                        self.nowDEF += (self.players[self.nowid].hand[c] - 3) if self.players[self.nowid].hand[c] not in [134, 10] else 1
+                    if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 2:
+                        self.nowDEF += 1
+                    if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 3:
+                        self.nowDEF -= 1
+                    if self.players[self.nowid].hand[c] !=134:
+                        self.players[self.nowid].identity.energy+=(self.players[self.nowid].hand[c] - 3) if self.players[self.nowid].hand[c] not in [10] else 1
+                    del self.players[self.nowid].hand[c]
+                elif ret in [2,4,6]:
+                    self.lostLife(self.nowid, ret)
+                    level = ret//2
+                    self.nowDEF += level
+                    self.players[self.nowid].usedmeta1 = 1
+                else:
+                    self.cheating()
+            
         self.status = s
     def USEMOVBASIC(self):
         s = self.status
@@ -569,29 +622,42 @@ class game:
         if self.players[1-self.nowid].identity.idx == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [168]):
             basicMOV.append(134)
         while True:
-            c = svr.connectBot(self.nowid, "int32_t", self)
-            if c >= self.players[self.nowid].hand.SIZE or c < 0 or self.players[self.nowid].hand[c] not in basicMOV:
-                # cheat
-                self.cheating()
-            if c == 0:
-                break
-            self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
-            self.nowMOV += (self.players[self.nowid].hand[c] - 6) if self.players[self.nowid].hand[c] not in [134, 10] else 1
-            if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 3:
-                self.nowMOV += 1
-                
-            if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 1:
-                self.nowMOV -= 1
-            if self.players[self.nowid].hand[c] != 134:
-                self.players[self.nowid].identity.energy+=(self.players[self.nowid].hand[c] - 6) if self.players[self.nowid].hand[c] not in [10] else 1
-            del self.players[self.nowid].hand[c]
+            if self.players[self.nowid].identity.idx == 2 and 143 in  self.players[self.nowid].metamorphosis and self.players[self.nowid].usedmeta1 == 0:
+                s = self.status
+                self.status = state.LOST_LIFE_FOR_USESKILL
+                ret = svr.connectBot(self.nowid, 'int8_t', game)
+                self.status = s
+                if ret == 0:
+                    c = svr.connectBot(self.nowid, "int32_t", self)
+                    if c >= len(self.players[self.nowid].hand) or c < 0 or self.players[self.nowid].hand[c] not in basicMOV:
+                        # cheat
+                        self.cheating()
+                    if c == 0:
+                        break
+                    self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
+                    self.nowMOV += (self.players[self.nowid].hand[c] - 6) if self.players[self.nowid].hand[c] not in [134, 10] else 1
+                    if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 3:
+                        self.nowMOV += 1
+                        
+                    if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 1:
+                        self.nowMOV -= 1
+                    if self.players[self.nowid].hand[c] != 134:
+                        self.players[self.nowid].identity.energy+=(self.players[self.nowid].hand[c] - 6) if self.players[self.nowid].hand[c] not in [10] else 1
+                    del self.players[self.nowid].hand[c]
+                elif ret in [2,4,6]:
+                    self.lostLife(self.nowid, ret)
+                    level = ret//2
+                    self.nowMOV += level
+                    self.players[self.nowid].usedmeta1 = 1
+                else:
+                    self.cheating()
         self.status = s
     def USESKILL(self):
         s = self.status
         self.status = state.USE_SKILL
         c = svr.connectBot(self.nowid, "int32_t", self)
         skillC = [(self.players[self.nowid].identity.idx*12+11+j) for j in range(12)]
-        if c >= self.players[self.nowid].hand.SIZE or c < 0 or self.players[self.nowid].hand[c] not in skillC:
+        if c >= len(self.players[self.nowid].hand) or c < 0 or self.players[self.nowid].hand[c] not in skillC:
             # cheat
             self.cheating()
         
@@ -616,7 +682,7 @@ class game:
             basic = [7,8,9]
             if self.players[1-self.nowid].identity.idx == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [168]):
                 basic.append(134)
-        if c >= self.players[self.nowid].hand.SIZE or c < 0 or self.players[self.nowid].hand[c] not in basic:
+        if c >= len(self.players[self.nowid].hand) or c < 0 or self.players[self.nowid].hand[c] not in basic:
             # cheat
             self.cheating()
         self.status = s
@@ -635,7 +701,7 @@ class game:
     def moveCharacter(self, dir:int, dis:int):
         dif = (dir*2-1)*dis
         ret = False
-        while self.nowPlayer.locate[1]+dif >9 or self.nowPlayer.locate[1]+dif<1:
+        while self.players[self.nowid].locate[1]+dif >9 or self.players[self.nowid].locate[1]+dif<1:
             dis -=1
             dif = (dir*2-1)*dis
         if self.getRange()==dis:
@@ -643,16 +709,17 @@ class game:
             dif = (dir*2-1)*dis
         elif self.getRange()>dis:
             ret = True
-        self.nowPlayer.locate[1]+=dif
+        self.players[self.nowid].locate[1]+=dif
         return ret
     def putPosion(self, target):
-        if self.players[1-target].snowWhite.remindPosion.SIZE == 0:
+        if len(self.players[1-target].identity.remindPosion) == 0:
             return
-        now = self.players[1-target].snowWhite.remindPosion[0]
-        self.nowPlayer.graveyard.append(now)
-        self.players[1-target].snowWhite.remindPosion-=1
-        posion = self.nowPlayer.usecards[i]-131
-        for i in range(self.players[1-self.nowid].metamorphosis.SIZE):
+        now = self.players[1-target].identity.remindPosion[0]
+        del self.players[1-target].identity.remindPosion[0]
+        self.players[target].graveyard.append(now)
+        self.players[1-target].identity.remindPosion-=1
+        posion = self.players[target].usecards[i]-131
+        for i in range(len(self.players[1-self.nowid].metamorphosis)):
             if self.players[1-self.nowid].metamorphosis[i] == 142:
                 posion+=1
         self.lostLife(self.nowid, posion)
@@ -662,7 +729,7 @@ class game:
         loc = svr.connectBot(self.nowid, "int32_t", self)
         card = self.getlastcard()
         if card in [29,30,31]:
-            if loc not in [self.nowPlayer.locate[1]+1, self.nowPlayer.locate[1]-1] or loc<1 or loc>9:
+            if loc not in [self.players[self.nowid].locate[1]+1, self.players[self.nowid].locate[1]-1] or loc<1 or loc>9:
                 self.cheating()
         self.nowTarget.locate[1] = loc
 def vectorHave(vec:list, ls:list):
