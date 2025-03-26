@@ -66,6 +66,7 @@ typedef struct _player {
     struct {
         uint32_t KI_TOKEN;
         uint8_t extraCard;
+        uint8_t extraDraw;
     } mulan;
 
     // kaguya 5
@@ -137,9 +138,13 @@ CHANGE_IDENTITY               int8_t       change identity or not(check last use
 CHOOSE_MOVE_DIS               int8_t       choose the moving distanse(check last use card to confirm limit of move distanse)
 
 GET_KI                        int32_t      get ki by drop defense card or general card(return index of card, **1 base**, 0 is meaning not use)
-
+SPEND_KI_FOR_ATK              int32_t      use ki for atk metamorphosis (return the number of KI you want to use)
+SPEND_KI_FOR_DRAW             int32_t      use ki for defense skill (return the number of KI you want to use)
+SPEND_KI_FOR_MOV              int32_t      use ki for move metamorphosis (return the number of KI you want to use)
+DROP_ONE_DRAW_ONE             int32_t      for drop card, choose hand(value:index of card, **1 base**, 0 is not do it)
 PUT_TO_ANOTHER_SIDE           int8_t       choose move target to another side or not
 CHOOSE_MOVE_NEARBY            int8_t       move to the locate next to target(-1:left, 1:right, 0:no move)
+
 KEEP_OR_BACK                  int8_t       keep the card or drop it(1:keep, 0:drop, the card store in nowusingCardID)
 LOST_LIFE_FOR_REMOVECARD      int8_t       kaguya's skill, (1:lost, 0:no)
 MOVE_TO_TANTACLE              int32_t      locate you choose(should in tentacle_TOKEN_locate or your original locate)

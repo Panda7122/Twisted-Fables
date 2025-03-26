@@ -71,6 +71,7 @@ class player:
         elif self.identity.idx == 4:
             ret.mulan.KI_TOKEN = self.identity.KI_TOKEN
             ret.mulan.extraCard = self.identity.extraCard
+            ret.mulan.extraDraw = self.identity.extraDraw
         elif self.identity.idx == 5:
             pass
         elif self.identity.idx == 6:
@@ -100,6 +101,7 @@ class player:
                     "havedrestart":p.alice.havedrestart,
                     "KI_TOKEN":p.mulan.KI_TOKEN,
                     "extraCard":p.mulan.extraCard,
+                    "extraDraw":p.mulan.extraDraw,
                     "remindMatch":p.matchGirl.remindMatch,
                     "COMBO_TOKEN":p.dorothy.COMBO_TOKEN,
                     "canCombo":p.dorothy.canCombo,

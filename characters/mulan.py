@@ -9,6 +9,9 @@ class mulanATKSkill(atkCard):
             K = g.players[g.nowid].identity.spendKIforATK(g)
             if K>3 or K<0:
                 g.cheating()
+            if K > g.players[g.nowid].identity.KI_TOKEN:
+                g.cheating()
+            g.players[g.nowid].identity.KI_TOKEN -= K
         g.damage(1-g.nowid, 1, self.level+level+K)
         g.players[g.nowid].identity.putAnotherSide(g)
         if g.players[1-g.nowid].locate in [1,9]:
@@ -72,8 +75,23 @@ class mulanMETASkill(metaCard):
         pass
 class mulanUltraSkill(ultraCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
-        pass
+        if self.cardName == '氣沖雲霄':
+            g.players[g.nowid].identity.extraDraw = 4
+        elif self.cardName == '直面混沌':
+            s = g.status
+            g.status = state.CHOOSE_MOVE_NEARBY
+            loc = svr.connectBot(g.nowid, 'int32_t', g)
+            if loc not in [-1, 1]:
+                g.cheating()
+            if g.players[1-g.nowid].locate + loc > 9 or g.players[1-g.nowid].locate + loc < 1:
+                g.cheating()
+            g.players[g.nowid].locate = g.players[1-g.nowid].locate + loc
+            g.status = s
+            g.players[g.nowid].identity.KI_TOKEN +=3
+        elif self.cardName == '雷霆一擊':
+            X = g.players[g.nowid].identity.KI_TOKEN
+            g.players[g.nowid].identity.KI_TOKEN = 0
+            g.damage(1-g.nowid, 1, X)
 class mulan(character):
     def idx():
         return 4
@@ -86,10 +104,12 @@ class mulan(character):
         self.specialGate = 17   
         self.KI_TOKEN = 0
         self.extraCard = 0
-    def __init__(self, KI_TOKEN = 0, extraCard = 0, **kwargs):
+        self.extraDraw = 0
+    def __init__(self, KI_TOKEN = 0, extraCard = 0, extraDraw = 0, **kwargs):
         self.setup()
         self.KI_TOKEN = KI_TOKEN
         self.extraCard = extraCard
+        self.extraDraw = extraDraw
         self.characterName = "花木蘭"
         self.picture = "沒有圖片"
         atklv1 =  mulanATKSkill("沒有圖片", "", 1)
@@ -124,7 +144,27 @@ class mulan(character):
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)
-    def spendKIforDraw(self, g):
-        pass
-    def spendKIforATK(self, g):
-        pass
+    def spendKIforDraw(self, g:game):
+        s = g.status
+        g.status = state.SPEND_KI_FOR_DRAW
+        ret = svr.connectBot(g.nowid, 'int32_t', g)
+        if ret > self.KI_TOKEN:
+            g.cheating()
+        g.status= s
+        return ret
+    def spendKIforATK(self, g:game):
+        s = g.status
+        g.status = state.SPEND_KI_FOR_ATK
+        ret = svr.connectBot(g.nowid, 'int32_t', g)
+        g.status= s
+        if ret > self.KI_TOKEN:
+            g.cheating()
+        return ret
+    def spendKIforATK(self, g:game):
+        s = g.status
+        g.status = state.SPEND_KI_FOR_MOV
+        ret = svr.connectBot(g.nowid, 'int32_t', g)
+        g.status= s
+        if ret > self.KI_TOKEN:
+            g.cheating()
+        return ret
