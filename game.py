@@ -73,6 +73,8 @@ class player:
             ret.mulan.extraCard = self.identity.extraCard
             ret.mulan.extraDraw = self.identity.extraDraw
         elif self.identity.idx == 5:
+            ret.kaguya.useDefenseAsATK = self.identity.useDefenseAsATK
+            ret.kaguya.useMoveTarget = self.identity.useMoveTarget
             pass
         elif self.identity.idx == 6:
             pass
@@ -102,6 +104,8 @@ class player:
                     "KI_TOKEN":p.mulan.KI_TOKEN,
                     "extraCard":p.mulan.extraCard,
                     "extraDraw":p.mulan.extraDraw,
+                    "useDefenseAsATK":p.kaguya.useDefenseAsATK,
+                    "useMoveTarget":p.kaguya.useMoveTarget,
                     "remindMatch":p.matchGirl.remindMatch,
                     "COMBO_TOKEN":p.dorothy.COMBO_TOKEN,
                     "canCombo":p.dorothy.canCombo,
@@ -166,6 +170,8 @@ class player:
         self.graveyard.append(self.defenseSkill.cards[0])
         del self.defenseSkill.cards[0]
         if self.defenseSkill.cards[0] >=135:
+            if self.defenseSkill.cards[0] in [155, 156, 157]:
+                self.identity.maxdefense += 1
             if self.defenseSkill.cards[0] in [146,162,176]:
                 if self.defenseSkill.cards[0] == 146:
                     self.identity.life += 5
@@ -550,6 +556,10 @@ class game:
         self.status = state.USE_ATK
         self.nowATK = 0
         basicATK = [1,2,3, 10]
+        if self.players[self.nowid].identity.idx == 5 and 155 in self.players[self.nowid].metamorphosis and self.players[self.nowid].identity.useDefenseAsATK == 0:
+            basicATK.append(4)
+            basicATK.append(5)
+            basicATK.append(6)
         if self.players[1-self.nowid].identity.idx == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [166]):
             basicATK.append(134)
         while True:
@@ -582,7 +592,27 @@ class game:
                     self.players[self.nowid].usedmeta1 = 1
                 else:
                     self.cheating()
-            
+            else:
+                c = svr.connectBot(self.nowid, "int32_t", self)
+                if c >= len(self.players[self.nowid].hand) or c < 0 or self.players[self.nowid].hand[c] not in basicATK:
+                    # cheat
+                    self.cheating()
+                if c == 0:
+                    break
+                self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
+                if self.players[self.nowid].hand[c] in [4,5,6]:
+                    self.players[self.nowid].identity.useDefenseAsATK = 1
+                    self.nowATK += self.players[self.nowid].hand[c]-3
+                else:
+                    self.nowATK += self.players[self.nowid].hand[c] if self.players[self.nowid].hand[c] not in [134, 10] else 1
+                if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 1:
+                    self.nowATK += 1
+                    
+                if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 2:
+                    self.nowATK -= 1
+                if self.players[self.nowid].hand[c] !=134:
+                    self.players[self.nowid].identity.energy+=self.players[self.nowid].hand[c] if self.players[self.nowid].hand[c] not in [10] else 1
+                del self.players[self.nowid].hand[c]
             
         self.status = s
     def USEDEFBASIC(self):
@@ -622,7 +652,23 @@ class game:
                     self.players[self.nowid].usedmeta1 = 1
                 else:
                     self.cheating()
-            
+            else:
+                c = svr.connectBot(self.nowid, "int32_t", self)
+                if c >= len(self.players[self.nowid].hand) or c < 0 or self.players[self.nowid].hand[c] not in basicDEF:
+                    # cheat
+                    self.cheating()
+                if c == 0:
+                    break
+                self.players[self.nowid].usecards.append(self.players[self.nowid].hand[c])
+                if not (self.players[self.nowid].identity.idx == 2 and self.players[self.nowid].AWAKEN == 1):
+                    self.nowDEF += (self.players[self.nowid].hand[c] - 3) if self.players[self.nowid].hand[c] not in [134, 10] else 1
+                if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 2:
+                    self.nowDEF += 1
+                if self.players[self.nowid].identity.idx == 3 and self.players[self.nowid].identity.identity == 3:
+                    self.nowDEF -= 1
+                if self.players[self.nowid].hand[c] !=134:
+                    self.players[self.nowid].identity.energy+=(self.players[self.nowid].hand[c] - 3) if self.players[self.nowid].hand[c] not in [10] else 1
+                del self.players[self.nowid].hand[c]
         self.status = s
     def USEMOVBASIC(self):
         s = self.status

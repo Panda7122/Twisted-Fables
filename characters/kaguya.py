@@ -32,11 +32,26 @@ class kaguyaMOVSkill(movCard):
         pass
 class kaguyaMETASkill(metaCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
-        pass
+        if self.cardName == '靈性本能':
+            if g.players[g.nowid].identity.useMoveTarget == 0:
+                if g.players[g.nowid].identity.defense > g.players[1-g.nowid].identity.defense:
+                    s = g.status
+                    g.status = state.MOVE_TARGET
+                    lr = svr.connectBot(g.nowid, 'int8_t', g)
+                    if lr not in [1,-1]:
+                        g.cheating()
+                    if g.players[1-g.nowid].locate+lr > 9 or g.players[1-g.nowid].locate+lr < 1:
+                        g.cheating()
+                    g.players[1-g.nowid].locate+=lr
+                    g.status = s
+                g.players[g.nowid].identity.useMoveTarget = 1
+            else:
+                g.cheating()
 class kaguyaUltraSkill(ultraCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
+        if self.cardName == '注定的審判':
+            g.players[g.nowid].identity.defense += 6
+            g.players[g.nowid].identity.defense = min(g.players[g.nowid].identity.defense, g.players[g.nowid].identity.maxdefense) 
         pass
 class kaguya(character):
     def idx():
@@ -48,8 +63,11 @@ class kaguya(character):
         self.defense = 0
         self.energy = 0
         self.specialGate = 16
-    def __init__(self, **kwargs):
+        self.useDefenseAsATK = 0
+    def __init__(self, useDefenseAsATK = 0,useMoveTarget = 0, **kwargs):
         self.setup()
+        self.useDefenseAsATK = useDefenseAsATK
+        self.useMoveTarget = useMoveTarget
         self.characterName = "輝夜姬"
         self.picture = "沒有圖片"
         atklv1 =  kaguyaATKSkill("沒有圖片", "", 1)

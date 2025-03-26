@@ -30,8 +30,10 @@ def settlementContinue(g:game):
                 if g.players[g.nowid].defense > g.players[1-g.nowid].defense:
                     g.lostLife(1-g.nowid, g.players[g.nowid].defense-g.players[1-g.nowid].defense)
             elif g.players[g.nowid].usecards[i] == 82:
+                s = g.status
                 g.status = state.SET_TARGET_LOCATE_TO_NEARBY
                 loc = svr.connectBot(g.nowid, "int8_t", g)
+                g.status = s
                 if abs(g.players[g.nowid].locate[1] - loc) != 1 and g.players[1-g.nowid].locate[1] != loc:
                     # cheat
                     g.cheating()
@@ -249,6 +251,9 @@ def main():
                     g.lostLife(g.nowid, posion)
             for i in range(len(g.players[g.nowid].usecards)):
                 del g.players[g.nowid].usecards[i]
+            if g.players[g.nowid].identity.idx == 5 and 156 in g.players[g.nowid].metamorphosis:
+                for _ in range(g.players[g.nowid].defense//3):
+                    g.drawCard(g.nowid)
             g.players[g.nowid].defense = 0
             # TODO move phase
             moved:bool = False
@@ -439,19 +444,39 @@ def main():
             g.nowDEF = 0
             g.nowMOV = 0
             g.nowUsingCardID = 0
-            for i in range(len(g.players[g.nowid].hand)):
-                if g.players[g.nowid].hand[i] in []:
+            for i in range(len(g.players[g.nowid].usecards)):
+                if g.players[g.nowid].usecards[i] not in [14,15,16,
+                                                          45,
+                                                          78,79,80,81,82,
+                                                          122,123,124]:
+                    g.players[g.nowid].graveyard.append(g.players[g.nowid].usecards[i])
+                    if g.players[g.nowid].usecards[i] == 134:
+                        eneragy = 1
+                        for i in range(len(g.players[1-g.nowid].metamorphosis)):
+                            if g.players[1-g.nowid].metamorphosis[i] in [166,167,168]:
+                                eneragy+=1
+                        g.players[1-g.nowid].energy += eneragy
+            for i in range(len(g.players[g.nowid].usecards)-1, -1, -1):
+                if g.players[g.nowid].usecards[i] not in [14,15,16,
+                                                          45,
+                                                          78,79,80,81,82,
+                                                          122,123,124]:
+                    del g.players[g.nowid].usecards[i]
+                else:
                     i+=1
-                    continue
+            for i in range(len(g.players[g.nowid].hand)):
+                # if g.players[g.nowid].hand[i] in []:
+                #     i+=1
+                #     continue
                 g.players[g.nowid].graveyard.append(g.players[g.nowid].hand[i])
-                if g.players[g.nowid].usecards[i] == 134:
+                if g.players[g.nowid].hand[i] == 134:
                     eneragy = 1
                     for i in range(len(g.players[1-g.nowid].metamorphosis)):
                         if g.players[1-g.nowid].metamorphosis[i] in [166,167,168]:
                             eneragy+=1
                     g.players[1-g.nowid].energy += eneragy
-                if g.players[g.nowid].usecards[i] in [131, 132, 133]:
-                    posion = g.players[g.nowid].usecards[i]-131
+                if g.players[g.nowid].hand[i] in [131, 132, 133]:
+                    posion = g.players[g.nowid].hand[i]-131
                     for i in range(len(g.players[1-g.nowid].metamorphosis)):
                         if g.players[1-g.nowid].metamorphosis[i] == 142:
                             posion+=1
@@ -527,6 +552,13 @@ def main():
                     del g.players[g.nowid].hand[id]
                     g.drawCard(g.nowid)
                 g.status = s
+            if g.players[g.nowid].identity.idx == 5:
+                g.players[g.nowid].identity.useDefenseAsATK = 0
+                g.players[g.nowid].identity.useMoveTarget = 0
+                for m in g.players[g.nowid].metamorphosis:
+                    if m == 158:
+                        g.players[g.nowid].identity.defense += 2
+                        g.players[g.nowid].identity.defense = min(g.players[g.nowid].identity.maxdefense, g.players[g.nowid].identity.defense)
             g.nowid = 1-g.nowid
     finally:    
         svr.close()
