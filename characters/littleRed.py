@@ -186,13 +186,13 @@ class littleRedUltraSkill(ultraCard):
                 dir = g.chooseMovingDir()
                 through = g.moveCharacter( dir, g.nowMOV)
                 if through:
-                    if g.players[1-g.nowid].identity.idx == 3 and vectorHave(g.players[1-g.nowid].metamorphosis, [149]):
+                    if g.players[1-g.nowid].identity.idx == 3 and g.players[1-g.nowid].identity.identity == 3 and vectorHave(g.players[1-g.nowid].metamorphosis, [149]):
                         g.drawCard( 1-g.nowid)
-                    elif g.players[g.nowid].identity.idx == 3 and vectorHave(g.players[g.nowid].metamorphosis, [149]):
+                    elif g.players[g.nowid].identity.idx == 3 and g.players[g.nowid].identity.identity == 3 and vectorHave(g.players[g.nowid].metamorphosis, [149]):
                         g.drawCard( g.nowid)
                     elif g.players[1-g.nowid].identity.idx == 1 and vectorHave(g.players[1-g.nowid].metamorphosis, [141]):
                         g.putPosion( g.nowid)
-                    elif g.players[g.nowid].identity.idx == 1 and vectorHave(g.players[1-g.nowid].metamorphosis, [141]):
+                    elif g.players[g.nowid].identity.idx == 1 and vectorHave(g.players[g.nowid].metamorphosis, [141]):
                         g.putPosion( 1-g.nowid)
                 g.players[g.nowid].identity.energy+=lastAct.mov
             elif len(lastAct.useskill) != 0:
@@ -210,7 +210,21 @@ class littleRedUltraSkill(ultraCard):
             g.knockback(3)
             for _ in range(3):
                 g.nowid = 1-g.nowid
-                g.dropCardFromHand()
+                id = g.dropCardFromHand()
+                g.players[g.nowid].graveyard.append(g.players[g.nowid].hand[id])
+                if g.players[g.nowid].hand[id] == 134:
+                    eneragy = 1
+                    for i in range(len(g.players[1-g.nowid].metamorphosis)):
+                        if g.players[1-g.nowid].metamorphosis[i] in [166,167,168]:
+                            eneragy+=1
+                    g.players[1-g.nowid].energy += eneragy
+                if g.players[g.nowid].hand[id] in [131, 132, 133]:
+                    posion = g.players[g.nowid].hand[id]-131
+                    for i in range(len(g.players[1-g.nowid].metamorphosis)):
+                        if g.players[1-g.nowid].metamorphosis[i] == 142:
+                            posion+=1
+                    g.lostLife( g.nowid, posion)    
+                del g.players[g.nowid].hand[id]
                 g.nowid = 1-g.nowid
         pass
 class littleRed(character):

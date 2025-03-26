@@ -228,6 +228,10 @@ def main():
                 if ident == g.player[g.nowid].identity.identity:
                     g.cheating()
                 g.player[g.nowid].identity.identity = ident
+            elif g.players[g.nowid].identity.idx == 4:
+                for m in g.players[g.nowid].metamorphosis:
+                    if m == 154:
+                        g.players[g.nowid].identity.KI_TOKEN += 1
             # clean phase
             for i in range(len(g.players[g.nowid].usecards)):
                 g.players[g.nowid].graveyard.append(g.players[g.nowid].usecards[i])
@@ -266,6 +270,11 @@ def main():
                     # choose a basic card from hand
                     
                     g.USEATKBASIC()
+                    if g.players[g.nowid].identity.idx == 4 and 151 in g.players[g.nowid].metamorphosis:
+                        K = g.players[g.nowid].identity.spendKIforATK(g)
+                        if K>3 or K<0:
+                            g.cheating()
+                        g.nowATK += K
                     dam = g.damage(1-g.nowid, 1, g.nowATK)
                     if g.players[g.nowid].identity.idx == 1 and dam >=2 and vectorHave(g.players[g.nowid].metamorphosis, [139]):
                         g.putPosion( 1-g.nowid)
@@ -285,13 +294,13 @@ def main():
                     dir = g.chooseMovingDir()
                     through = g.moveCharacter( dir, g.nowMOV)
                     if through:
-                        if g.players[1-g.nowid].identity.idx == 3 and vectorHave(g.players[1-g.nowid].metamorphosis, [149]):
+                        if g.players[1-g.nowid].identity.idx == 3 and g.players[1-g.nowid].identity.identity == 3 and vectorHave(g.players[1-g.nowid].metamorphosis, [149]):
                             g.drawCard( 1-g.nowid)
-                        elif g.players[g.nowid].identity.idx == 3 and vectorHave(g.players[g.nowid].metamorphosis, [149]):
+                        elif g.players[g.nowid].identity.idx == 3 and g.players[g.nowid].identity.identity == 3 and vectorHave(g.players[g.nowid].metamorphosis, [149]):
                             g.drawCard( g.nowid)
                         elif g.players[1-g.nowid].identity.idx == 1 and vectorHave(g.players[1-g.nowid].metamorphosis, [141]):
                             g.putPosion( g.nowid)
-                        elif g.players[g.nowid].identity.idx == 1 and vectorHave(g.players[1-g.nowid].metamorphosis, [141]):
+                        elif g.players[g.nowid].identity.idx == 1 and vectorHave(g.players[g.nowid].metamorphosis, [141]):
                             g.putPosion( 1-g.nowid)
                     lastAct.atk = lastAction(0, 0,g.nowMOV, [])
                         
@@ -437,14 +446,42 @@ def main():
             for i in range(len(g.players[g.nowid].hand)):
                 del g.players[g.nowid].hand[i]
             cardNum = 6
-            if g.players[g.nowid].identity == 2:
-                g.players[g.nowid].usedmeta1 = 0
-                g.players[g.nowid].usedmeta2 = 0
+            if g.players[g.nowid].identity.idx == 2:
+                g.players[g.nowid].identity.usedmeta1 = 0
+                g.players[g.nowid].identity.usedmeta2 = 0
+            elif g.players[g.nowid].identity.idx == 3:
+                g.players[g.nowid].identity.riseBasic = 0
             if g.players[g.nowid].identity.idx == 4 and g.players[g.nowid].identity.KI_TOKEN > 0 and g.players[g.nowid].identity.extraCard > 0:
                 add = g.players[g.nowid].identity.spendKIforDraw(g)
+                if add > g.players[g.nowid].identity.extraCard or add < 0:
+                    g.cheating()
                 cardNum += add
+                g.players[g.nowid].identity.extraCard = 0
+            
             for _ in range(cardNum):
                 g.drawCard(g.nowid)
+            if g.players[g.nowid].identity.idx == 3 and g.players[g.nowid].identity.restartTurn > 0:
+                g.players[g.nowid].identity.restartTurn -= 1
+                while(len(g.players[g.nowid].hand) > 4):
+                    d = g.dropCardFromHand()
+                    id = g.players[g.nowid].graveyard.append(g.players[g.nowid].hand[id])
+                    if g.players[g.nowid].hand[id] == 134:
+                        eneragy = 1
+                        for i in range(len(g.players[1-g.nowid].metamorphosis)):
+                            if g.players[1-g.nowid].metamorphosis[i] in [166,167,168]:
+                                eneragy+=1
+                        g.players[1-g.nowid].energy += eneragy
+                    if g.players[g.nowid].hand[id] in [131, 132, 133]:
+                        posion = g.players[g.nowid].hand[id]-131
+                        for i in range(len(g.players[1-g.nowid].metamorphosis)):
+                            if g.players[1-g.nowid].metamorphosis[i] == 142:
+                                posion+=1
+                        g.lostLife( g.nowid, posion)    
+                    del g.players[g.nowid].hand[id]
+                g.nowid = 1-g.nowid
+            elif g.players[g.nowid].identity.idx == 3:
+                g.players[g.nowid].identity.restartTurn = 0
+                g.players[g.nowid].identity.havedrestart = 0
             g.nowid = 1-g.nowid
     finally:    
         svr.close()

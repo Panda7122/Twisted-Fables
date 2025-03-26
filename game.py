@@ -65,6 +65,9 @@ class player:
             ret.sleepingBeauty.usedmeta2 = self.identity.usedmeta2
         elif self.identity.idx == 3:
             ret.alice.identity = self.identity.identity
+            ret.alice.riseBasic = self.identity.riseBasic
+            ret.alice.restartTurn = self.identity.restartTurn
+            ret.alice.havedrestart = self.identity.havedrestart
         elif self.identity.idx == 4:
             ret.mulan.KI_TOKEN = self.identity.KI_TOKEN
             ret.mulan.extraCard = self.identity.extraCard
@@ -92,6 +95,9 @@ class player:
                     "usedmeta2":p.sleepingBeauty.usedmeta2,
                     "dayNightmareDrawRemind" : p.sleepingBeauty.dayNightmareDrawRemind,
                     "identity":p.alice.identity,
+                    "riseBasic":p.alice.riseBasic,
+                    "restartTurn":p.alice.restartTurn,
+                    "havedrestart":p.alice.havedrestart,
                     "KI_TOKEN":p.mulan.KI_TOKEN,
                     "extraCard":p.mulan.extraCard,
                     "remindMatch":p.matchGirl.remindMatch,
@@ -403,12 +409,13 @@ class game:
                     self.nowUsingCardID = us
                 dam -= X
                 self.nowid = 1-self.nowid
-                
+             
             if self.players[target].identity.idx == 4: # KI
                 self.nowid = 1-self.nowid
-                use = self.players[target].identity.askUseKI(self)
-                if use == 1:
-                    card = self.players[target].identity.useKI(self)
+                card = self.players[target].identity.getKI(self)
+                if card <-1 or card >= len(self.players[target].hand):
+                    self.cheating()
+                if card != -1:
                     if self.players[target].hand[card] not in [4,5,6,10]:
                         self.cheating()
                     if self.players[target].hand[card] == 10:
@@ -416,6 +423,7 @@ class game:
                     else :
                         lv = self.players[target].hand[card]-3
                     dam -= lv
+                    self.players[target].identity.KI_TOKEN += lv
                     self.players[target].graveyard.append(self.players[target].hand[card])
                     del self.players[target].hand[card]
                 self.nowid = 1-self.nowid

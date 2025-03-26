@@ -49,10 +49,13 @@ class aliceMOVSkill(movCard):
         if through:
             for _ in range(self.level):
                 g.drawCard( g.nowid)
-            if g.players[1-g.nowid].identity.idx == 3 and vectorHave(g.players[1-g.nowid].metamorphosis, [149]):
+            if g.players[1-g.nowid].identity.idx == 3 and g.players[1-g.nowid].identity.identity == 3 and vectorHave(g.players[1-g.nowid].metamorphosis, [149]):
                 g.drawCard( 1-g.nowid)
-            elif g.players[g.nowid].identity.idx == 3 and vectorHave(g.players[g.nowid].metamorphosis, [149]):
+            elif g.players[g.nowid].identity.idx == 3 and g.players[g.nowid].identity.identity == 3 and vectorHave(g.players[g.nowid].metamorphosis, [149]):
                 g.drawCard( g.nowid)
+            elif g.players[1-g.nowid].identity.idx == 1 and vectorHave(g.players[1-g.nowid].metamorphosis, [141]):
+                g.putPosion( g.nowid)
+                    
         s = g.status 
         g.status = state.CHANGE_IDENTITY
         ch = svr.connectBot(g.nowid,"int8_t", g)
@@ -65,7 +68,13 @@ class aliceMETASkill(metaCard):
         pass
 class aliceUltraSkill(ultraCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
+        if self.cardName == '精彩的奇妙日':
+            g.players[g.nowid].identity.riseBasic = 1
+        elif self.cardName == '無休止的派對':
+            g.players[g.nowid].identity.restartTurn = 1
+            g.players[g.nowid].identity.havedrestart += 1
+            if(g.players[g.nowid].identity.havedrestart>3):
+                g.cheating()
         pass
 class alice(character):
     def idx():
@@ -77,9 +86,15 @@ class alice(character):
         self.defense = 0 
         self.energy = 0
         self.specialGate = 16   
-    def __init__(self, identity = 0, **kwargs):
+        self.riseBasic = 0
+        self.restartTurn = 0
+        self.havedrestart = 0
+    def __init__(self, identity = 0, riseBasic = 0, restartTurn = 0,havedrestart = 0, **kwargs):
         self.setup()
         self.identity = identity
+        self.riseBasic = riseBasic
+        self.restartTurn = restartTurn
+        self.havedrestart = havedrestart
         self.characterName = "愛麗絲"
         self.picture = "沒有圖片"
         atklv1 =  aliceATKSkill("沒有圖片", "", 1)
@@ -140,7 +155,7 @@ class alice(character):
                     g.cheating()
                 del g.players[g.nowid].moveSkill[0]
         flag = 0
-        if (skillType == 1 and 147 in g.players[g.nowid].metamorphosis) or (skillType == 2 and 148 in g.players[g.nowid].metamorphosis):
+        if (self.identity == 1 and skillType == 1 and 147 in g.players[g.nowid].metamorphosis) or (self.identity == 2 and skillType == 2 and 148 in g.players[g.nowid].metamorphosis):
             g.status = state.TAKE_TO_HAND
             c = svr.connectBot(g.nowid, "int8_t", g)
             if c == 1:

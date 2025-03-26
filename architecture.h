@@ -57,6 +57,9 @@ typedef struct _player {
     // alice 3
     struct {
         uint8_t identity;  // 0:none 1:紅心皇后 2:瘋帽子 3:柴郡貓
+        int32_t riseBasic;
+        int32_t restartTurn;
+        int32_t havedrestart;
     } alice;
 
     // Mulan 4
@@ -132,6 +135,9 @@ CHOOSECARDS                   int32_t      choose a card from nowShowingCards(re
 TAKE_TO_HAND                  int8_t       get card instead put it from graveyards (return 0 or 1)
 CHANGE_IDENTITY               int8_t       change identity or not(check last use card to check which you will change)(return 0:no or 1:yes)
 CHOOSE_MOVE_DIS               int8_t       choose the moving distanse(check last use card to confirm limit of move distanse)
+
+GET_KI                        int32_t      get ki by drop defense card or general card(return index of card, **1 base**, 0 is meaning not use)
+
 PUT_TO_ANOTHER_SIDE           int8_t       choose move target to another side or not
 CHOOSE_MOVE_NEARBY            int8_t       move to the locate next to target(-1:left, 1:right, 0:no move)
 KEEP_OR_BACK                  int8_t       keep the card or drop it(1:keep, 0:drop, the card store in nowusingCardID)

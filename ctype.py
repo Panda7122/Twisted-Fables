@@ -82,6 +82,8 @@ class Cplayer(cstruct.MemCStruct):
         // alice 3
         struct {
             uint8_t identity;  // 0:none 1:紅心皇后 2:瘋帽子 3:柴郡貓
+            int32_t riseBasic;
+            int32_t restartTurn;
         } alice;
 
         // Mulan 4

@@ -36,16 +36,16 @@ class mermaidMOVSkill(movCard):
             g.players[g.nowid].graveyard.append(g.players[g.nowid].hand[id])
             if g.players[g.nowid].hand[id] == 134:
                 eneragy = 1
-                for i in range(len(self.players[1-self.nowid].metamorphosis)):
-                    if self.players[1-self.nowid].metamorphosis[i] in [166,167,168]:
+                for i in range(len(g.players[1-g.nowid].metamorphosis)):
+                    if g.players[1-g.nowid].metamorphosis[i] in [166,167,168]:
                         eneragy+=1
-                self.players[1-self.nowid].energy += eneragy
+                g.players[1-g.nowid].energy += eneragy
             if g.players[g.nowid].hand[id] in [131, 132, 133]:
                 posion = g.players[g.nowid].hand[id]-131
-                for i in range(len(self.players[1-self.nowid].metamorphosis)):
-                    if self.players[1-self.nowid].metamorphosis[i] == 142:
+                for i in range(len(g.players[1-g.nowid].metamorphosis)):
+                    if g.players[1-g.nowid].metamorphosis[i] == 142:
                         posion+=1
-                self.lostLife( self.nowid, posion)    
+                g.lostLife( g.nowid, posion)    
             del g.players[g.nowid].hand[id]
             g.nowid = 1-g.nowid
 class mermaidMETASkill(metaCard):

@@ -4,7 +4,12 @@ from game import *
 from character import *
 class mulanATKSkill(atkCard):
     def skill(self, g:game, level):
-        g.damage(1-g.nowid, 1, self.level+level)
+        K = 0
+        if 151 in g.players[g.nowid].metamorphosis:
+            K = g.players[g.nowid].identity.spendKIforATK(g)
+            if K>3 or K<0:
+                g.cheating()
+        g.damage(1-g.nowid, 1, self.level+level+K)
         g.players[g.nowid].identity.putAnotherSide(g)
         if g.players[1-g.nowid].locate in [1,9]:
             cid = random.randint(0,len(g.players[1-g.nowid].hand-1))
@@ -120,4 +125,6 @@ class mulan(character):
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)
     def spendKIforDraw(self, g):
+        pass
+    def spendKIforATK(self, g):
         pass
