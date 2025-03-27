@@ -16,7 +16,7 @@ class lastAction:
     defense:int = 0
     mov:int = 0
     dam:int = 0
-    useskill:list[tuple[int]] = []
+    useskill:list[tuple[int]] = dataclasses.field(default_factory=list)
 lastAct:lastAction
 
 @dataclasses.dataclass
@@ -290,7 +290,7 @@ class state(enum.IntEnum):
     CHOOSE_MOVE_NEARBY = enum.auto()
     KEEP_OR_BACK = enum.auto()
     LOST_LIFE_FOR_REMOVECARD = enum.auto()
-    MOVE_TARGET = enum.auto()
+    KAGUYA_MOVE_TARGET = enum.auto()
     MOVE_TO_TANTACLE = enum.auto()
     CHOOSE_TANTACLE = enum.auto()
     MOVE_TANTACLE = enum.auto()

@@ -10,11 +10,7 @@
 #include <string.h>
 
 #include "vector.h"
-typedef struct _buyDeck {
-    vector cards;
-    // Scheherazade
-    uint32_t destiny_TOKEN;  // 0:none 1:blue 2:red
-} buyDeck;
+
 typedef struct _player {
     int8_t team;  // for 2v2 mode
     uint8_t locate[2];
@@ -36,7 +32,7 @@ typedef struct _player {
     vector specialDeck;
     // Little Red Riding Hood 0
     struct {
-        int saveCard[3];
+        int32_t saveCard[3];
     } redHood;
 
     // Snow White 1
@@ -88,7 +84,7 @@ typedef struct _player {
     // dorothy 8
     struct {
         uint32_t COMBO_TOKEN;
-        bool canCombo;
+        int8_t canCombo;
     } dorothy;
 
     // Scheherazade 9
@@ -99,7 +95,7 @@ typedef struct _player {
     } scheherazade;
 } player;
 enum state {
-    CHOOSE_IDENTITY,
+    CHOOSE_IDENTITY = 0,
     CHOOSE_TENTACLE_LOCATION,
     CHOOSE_SPECIAL_CARD,
     APPEND_DESTINY_TOKEN,
@@ -139,7 +135,7 @@ enum state {
     CHOOSE_MOVE_NEARBY,
     KEEP_OR_BACK,
     LOST_LIFE_FOR_REMOVECARD,
-    MOVE_TARGET,
+    KAGUYA_MOVE_TARGET,
     MOVE_TO_TANTACLE,
     CHOOSE_TANTACLE,
     MOVE_TANTACLE,
@@ -207,7 +203,7 @@ CHOOSE_MOVE_NEARBY            int8_t       move to the locate next to target(-1:
 
 KEEP_OR_BACK                  int8_t       keep the card or drop it(1:keep, 0:drop, the card store in nowusingCardID)
 LOST_LIFE_FOR_REMOVECARD      int8_t       kaguya's skill, (1:lost, 0:no)
-MOVE_TARGET                   int8_t       kaguya's move metamorphosis(-n:left, n:right, n is distance)
+KAGUYA_MOVE_TARGET                   int8_t       kaguya's move metamorphosis(-n:left, n:right, n is distance)
 
 MOVE_TO_TANTACLE              int32_t      locate you choose(should in tentacle_TOKEN_locate or your original locate)
 CHOOSE_TANTACLE               int32_t      choose a tantacle

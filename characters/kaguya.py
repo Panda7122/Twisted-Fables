@@ -36,7 +36,7 @@ class kaguyaMETASkill(metaCard):
             if g.players[g.nowid].identity.useMoveTarget == 0:
                 if g.players[g.nowid].identity.defense > g.players[1-g.nowid].identity.defense:
                     s = g.status
-                    g.status = state.MOVE_TARGET
+                    g.status = state.KAGUYA_MOVE_TARGET
                     lr = svr.connectBot(g.nowid, 'int8_t', g)
                     if lr not in [1,-1]:
                         g.cheating()
