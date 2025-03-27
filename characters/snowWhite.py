@@ -17,13 +17,13 @@ class snowWhiteDEFSkill(defCard):
             g.cheating()
         g.damage(1-g.nowid, 1, self.level)
         s = g.status
-        g.status = state.PUTTARGETPOSITION
+        g.status = state.PUT_TARGET_POSITION
         p = svr.connectBot(g.nowid, 'int32_t', g)
         use = 0
         for _ in range(p):
             if not use:
                 s = g.status
-                g.status = state.SHUFFLEPOSIONTODECK
+                g.status = state.SHUFFLE_POSION_TO_DECK
                 ask = svr.connectBot(g.nowid, 'int8_t', g)
                 if ask not in [0,1]:
                     g.cheating()
@@ -45,7 +45,7 @@ class snowWhiteMOVSkill(movCard):
         if g.getRange()> level+self.level-1:
             g.cheating()
         g.damage(1-g.nowid, level+self.level-1, self.level)
-        g.putTargetPosition()
+        g.PUT_TARGET_POSITION()
 class snowWhiteMETASkill(metaCard):
     def skill(self, g:game, level):
         # TODO not implement yet

@@ -98,7 +98,63 @@ typedef struct _player {
         int8_t selectToken;
     } scheherazade;
 } player;
-enum state { CHOOSE_CARD_TO_USE };
+enum state {
+    CHOOSE_IDENTITY,
+    CHOOSE_TENTACLE_LOCATION,
+    CHOOSE_SPECIAL_CARD,
+    APPEND_DESTINY_TOKEN,
+    SET_TARGET_LOCATE_TO_NEARBY,
+    CHOOSE_MOVE,
+    BUY_CARD_TYPE,
+    REMOVE_HG,
+    DROP_H,
+    USE_ATK,
+    USE_DEF,
+    USE_MOV,
+    USE_POSION,
+    CHOOSE_MOVING_DIR,
+    USE_SKILL,
+    TRIGGER_COMBO,
+    USEBASIC,
+    KNOCKBACK,
+    MOVE_TARGET,
+    PUT_TARGET_POSITION,
+    SHUFFLE_POSION_TO_DECK,
+    CHOOSE_CARD_BACK,
+    SLEEP_ATK_HERTSELF,
+    USE_AWAKEN_TOKEN,
+    LOST_LIFE_FOR_USESKILL,
+    RECYCLE_CARD,
+    CHOOSECARDS,
+    TAKE_TO_HAND,
+    CHANGE_IDENTITY,
+    CHOOSE_MOVE_DIS,
+    SEND_CARD,
+    GET_KI,
+    SPEND_KI_FOR_ATK,
+    SPEND_KI_FOR_DRAW,
+    SPEND_KI_FOR_MOV,
+    DROP_ONE_DRAW_ONE,
+    PUT_TO_ANOTHER_SIDE,
+    CHOOSE_MOVE_NEARBY,
+    KEEP_OR_BACK,
+    LOST_LIFE_FOR_REMOVECARD,
+    MOVE_TARGET,
+    MOVE_TO_TANTACLE,
+    CHOOSE_TANTACLE,
+    MOVE_TANTACLE,
+    DROPCARD_MOVE_TANTACLE,
+    SPEND_ENERGY,
+    SPEND_LIFE,
+    RECYCLE_MATCH,
+    DROP_CARD,
+    SPEND_COMBO,
+    FLIP_TOKEN_TO_RED,
+    CHOOSE_TOKEN,
+    TOKEN_GOAL,
+    GET_ULTRA,
+    USE_METAMORPHOSIS,
+};
 /*
 state                         return type  meaning
 CHOOSE_IDENTITY               int8_t       1:紅心皇后 2:瘋帽子 3:柴郡貓
@@ -126,12 +182,12 @@ USEBASIC                      int32_t      for use skill card, choose basic card
 KNOCKBACK                     int32_t      knockback enemy distanse(hint:check avilable value on player's last use card)
 MOVE_TARGET                   int32_t      move target(return locate after move)
 
-PUTTARGETPOSITION             int32_t      choose number of posion you want to push to target's deck(hint:check avilable value on player's last use card and skill that you used)
-SHUFFLEPOSIONTODECK           int8_t       shuffle posion to deck instead of put into graveyard(1:yes, 0:no)
+PUT_TARGET_POSITION           int32_t      choose number of posion you want to push to target's deck(hint:check avilable value on player's last use card and skill that you used)
+SHUFFLE_POSION_TO_DECK        int8_t       shuffle posion to deck instead of put into graveyard(1:yes, 0:no)
 CHOOSE_CARD_BACK              int32_t      shuffle back the target card from graveyard to deck(0:cancel, value:index of card, **1 base**)
 
-SLEEPATKHERTSELF              int32_t      sleeping beauty's skill hert herself(hint:you can check the last card you use to avoid cheating)
-USEAWAKENTOKEN                int8_t       use awaken token when using skill(at most 3)
+SLEEP_ATK_HERTSELF            int32_t      sleeping beauty's skill hert herself(hint:you can check the last card you use to avoid cheating)
+USE_AWAKEN_TOKEN                int8_t       use awaken token when using skill(at most 3)
 LOST_LIFE_FOR_USESKILL        int8_t       sleeping beauty's metamorphosis, (choose lose 0(not trigger),2,4,6 life)
 RECYCLE_CARD                  int32_t      sleeping beauty's metamorphosis, (choose a card from graveyard(0 is not trigger, 1 base))
 

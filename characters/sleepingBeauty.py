@@ -7,7 +7,7 @@ class sleepingBeautyATKSkill(atkCard):
         if g.getRange() > 1:
             g.cheating()
         s = g.status
-        g.status = state.SLEEPATKHERTSELF
+        g.status = state.SLEEP_ATK_HERTSELF
         h = svr.connectBot(g.nowid, 'int32_t', g)
         if h < 0 or h >  self.level:
             g.cheating()
@@ -18,7 +18,7 @@ class sleepingBeautyATKSkill(atkCard):
 class sleepingBeautyDEFSkill(defCard):
     def skill(self, g:game, level):
         if g.players[g.nowid].identity.AWAKEN == 1:
-            q = g.players[g.nowid].identity.askUseAWAKENTOKEN(g)
+            q = g.players[g.nowid].identity.askUSE_AWAKEN_TOKEN(g)
         else:
             q = 0
         g.players[g.nowid].identity.atkRiseTime = q+level
@@ -29,7 +29,7 @@ class sleepingBeautyMOVSkill(movCard):
         if g.getRange() > self.level+1:
             g.cheating()
         if g.players[g.nowid].identity.AWAKEN == 1:
-            q = g.players[g.nowid].identity.askUseAWAKENTOKEN(g)
+            q = g.players[g.nowid].identity.askUSE_AWAKEN_TOKEN(g)
         else:
             q = 0
         g.damage(1-g.nowid, self.level+1, level + q)
@@ -108,10 +108,10 @@ class sleepingBeauty(character):
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)
-    def askUseAWAKENTOKEN(self, g:game):
+    def askUSE_AWAKEN_TOKEN(self, g:game):
         if self.AWAKEN == 1:
             return 0
-        g.status = state.USEAWAKENTOKEN
+        g.status = state.USE_AWAKEN_TOKEN
         t = svr.connectBot(g.nowid, "int8_t", g)
         if t > 3 or t < 0:
             g.cheating()

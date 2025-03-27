@@ -250,7 +250,61 @@ class player:
                 self.metamorphosis.append(self.moveSkill.cards[0])
             del self.moveSkill.cards[0]
 class state(enum.IntEnum):
-    pass # TODO states
+    CHOOSE_IDENTITY = 0
+    CHOOSE_TENTACLE_LOCATION = enum.auto()
+    CHOOSE_SPECIAL_CARD = enum.auto()
+    APPEND_DESTINY_TOKEN = enum.auto()
+    SET_TARGET_LOCATE_TO_NEARBY = enum.auto()
+    CHOOSE_MOVE = enum.auto()
+    BUY_CARD_TYPE = enum.auto()
+    REMOVE_HG = enum.auto()
+    DROP_H = enum.auto()
+    USE_ATK = enum.auto()
+    USE_DEF = enum.auto()
+    USE_MOV = enum.auto()
+    USE_POSION = enum.auto()
+    CHOOSE_MOVING_DIR = enum.auto()
+    USE_SKILL = enum.auto()
+    TRIGGER_COMBO = enum.auto()
+    USEBASIC = enum.auto()
+    KNOCKBACK = enum.auto()
+    MOVE_TARGET = enum.auto()
+    PUT_TARGET_POSITION = enum.auto()
+    SHUFFLE_POSION_TO_DECK = enum.auto()
+    CHOOSE_CARD_BACK = enum.auto()
+    SLEEP_ATK_HERTSELF = enum.auto()
+    USE_AWAKEN_TOKEN = enum.auto()
+    LOST_LIFE_FOR_USESKILL = enum.auto()
+    RECYCLE_CARD = enum.auto()
+    CHOOSECARDS = enum.auto()
+    TAKE_TO_HAND = enum.auto()
+    CHANGE_IDENTITY = enum.auto()
+    CHOOSE_MOVE_DIS = enum.auto()
+    SEND_CARD = enum.auto()
+    GET_KI = enum.auto()
+    SPEND_KI_FOR_ATK = enum.auto()
+    SPEND_KI_FOR_DRAW = enum.auto()
+    SPEND_KI_FOR_MOV = enum.auto()
+    DROP_ONE_DRAW_ONE = enum.auto()
+    PUT_TO_ANOTHER_SIDE = enum.auto()
+    CHOOSE_MOVE_NEARBY = enum.auto()
+    KEEP_OR_BACK = enum.auto()
+    LOST_LIFE_FOR_REMOVECARD = enum.auto()
+    MOVE_TARGET = enum.auto()
+    MOVE_TO_TANTACLE = enum.auto()
+    CHOOSE_TANTACLE = enum.auto()
+    MOVE_TANTACLE = enum.auto()
+    DROPCARD_MOVE_TANTACLE = enum.auto()
+    SPEND_ENERGY = enum.auto()
+    SPEND_LIFE = enum.auto()
+    RECYCLE_MATCH = enum.auto()
+    DROP_CARD = enum.auto()
+    SPEND_COMBO = enum.auto()
+    FLIP_TOKEN_TO_RED = enum.auto()
+    CHOOSE_TOKEN = enum.auto()
+    TOKEN_GOAL = enum.auto()
+    GET_ULTRA = enum.auto()
+    USE_METAMORPHOSIS = enum.auto()
 class game:
     players:list[player]
     nowid:int
@@ -922,9 +976,9 @@ class game:
             if self.players[1-self.nowid].metamorphosis[i] == 142:
                 posion+=1
         self.lostLife(self.nowid, posion)
-    def putTargetPosition(self):
+    def PUT_TARGET_POSITION(self):
         s = self.status
-        self.status = state.PUTTARGETPOSITION
+        self.status = state.PUT_TARGET_POSITION
         loc = svr.connectBot(self.nowid, "int32_t", self)
         card = self.getlastcard()
         if card in [29,30,31]:
