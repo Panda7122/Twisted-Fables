@@ -160,7 +160,7 @@ state                         return type  meaning
 CHOOSE_IDENTITY               int8_t       1:紅心皇后 2:瘋帽子 3:柴郡貓
 CHOOSE_TENTACLE_LOCATION      int32_t      tentacle location
 CHOOSE_SPECIAL_CARD           int32_t      special card id
-APPEND_DESTINY_TOKEN          int32_t      -1,-2,-3 meaning skill(atk/def/mov), 1~10 meaning basic(atk/def/mov/general) TODO MODIFY
+APPEND_DESTINY_TOKEN          int32_t      -1,-2,-3 meaning skill(atk/def/mov), 1~10 meaning basic(atk/def/mov/general)
 SET_TARGET_LOCATE_TO_NEARBY   int32_t      set location(1~9)
 CHOOSE_MOVE                   int32_t      choose moves
                                            (0:focus, 1-3:use basic cards(1:atk,2:def,3:mov),

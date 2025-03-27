@@ -48,7 +48,7 @@ class snowWhiteMOVSkill(movCard):
         g.PUT_TARGET_POSITION()
 class snowWhiteMETASkill(metaCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
+        g.cheating()
         pass
 class snowWhiteUltraSkill(ultraCard):
     def skill(self, g:game, level):

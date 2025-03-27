@@ -33,8 +33,7 @@ class matchGirlMOVSkill(movCard):
         g.players[g.nowid].identity.life = min(g.players[g.nowid].identity.maxlife,g.players[g.nowid].identity.life)
 class matchGirlMETASkill(metaCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
-        pass
+        g.cheating()
 class matchGirlUltraSkill(ultraCard):
     def skill(self, g:game, level):
         if self.cardName == '地獄烈焰':

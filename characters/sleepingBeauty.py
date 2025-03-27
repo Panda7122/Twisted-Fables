@@ -37,7 +37,7 @@ class sleepingBeautyMOVSkill(movCard):
         pass
 class sleepingBeautyMETASkill(metaCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
+        g.cheating()
         pass
 class sleepingBeautyUltraSkill(ultraCard):
     def skill(self, g:game, level):

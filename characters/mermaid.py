@@ -50,12 +50,12 @@ class mermaidMOVSkill(movCard):
             g.nowid = 1-g.nowid
 class mermaidMETASkill(metaCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
-        pass
+        g.cheating()
+
 class mermaidUltraSkill(ultraCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
-        pass
+        g.cheating()
+
 class mermaid(character):
     def idx():
         return 6

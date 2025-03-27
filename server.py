@@ -274,7 +274,7 @@ def main():
                 for _ in range(g.players[g.nowid].defense//3):
                     g.drawCard(g.nowid)
             g.players[g.nowid].defense = 0
-            # TODO move phase
+            # move phase
             moved:bool = False
             while True:
                 select = g.chooseMove()
@@ -471,7 +471,7 @@ def main():
                         
                             
                     g.nowUsingCardID = 0
-                elif select == 5: # TODO use a special card
+                elif select == 5: # use a special card
                     card = g.USESKILL()
                     if (card-11)%12 < 9:
                         g.cheating()
@@ -511,7 +511,7 @@ def main():
                             if loc == -3:
                                 if ct == loc:
                                     g.lostLife(g.nowid, 1)
-                elif select == 7: # TODO metamorphosis
+                elif select == 7: # metamorphosis
                     s = g.status
                     g.status = state.USE_METAMORPHOSIS
                     ret = svr.connectBot(g.nowid, 'int32_t', g)
@@ -530,7 +530,7 @@ def main():
                         idx = (g.players[g.nowid].metamorphosis[ret]-169)%4
                     g.players[g.nowid].identity.metamorphosisSkill[idx].skill(g, idx)
                     g.status = s
-                elif select == 8: # TODO charactor special move
+                elif select == 8: # charactor special move
                     g.players[g.nowid].identity.specialMove(g)
                     pass
                 elif select == 9: # drop poison

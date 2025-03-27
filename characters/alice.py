@@ -64,7 +64,7 @@ class aliceMOVSkill(movCard):
         g.status = s
 class aliceMETASkill(metaCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
+        g.cheating()
         pass
 class aliceUltraSkill(ultraCard):
     def skill(self, g:game, level):

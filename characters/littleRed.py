@@ -178,7 +178,7 @@ class littleRedUltraSkill(ultraCard):
                 g.players[g.nowid].hand.append(c)
             g.nowShowingCards = []
         elif self.cardName == "系統入侵":
-            # TODO 重複你在本回合內剛使用過得一個行動或是一個攻擊技能、移動技能的效果（包含蛻變牌的效果）
+            # 重複你在本回合內剛使用過得一個行動或是一個攻擊技能、移動技能的效果（包含蛻變牌的效果）
             if lastAct.atk != 0:
                 g.damage(1-g.nowid, 1, lastAct.atk)
                 g.players[g.nowid].identity.energy+=lastAct.atk

@@ -152,7 +152,7 @@ class player:
                 if self.attackSkill.cards[0] == 146:
                     self.identity.life += 5
                     self.identity.life = min(self.identity.maxlife, self.identity.life)
-                elif self.attackSkill.cards[0] == 146: # TODO 暗潮湧動
+                elif self.attackSkill.cards[0] == 146: # 暗潮湧動
                     s = g.status
                     g.status = state.CHOOSE_TENTACLE_LOCATION
                     loc = svr.connectBot(g.nowid, 'int32_t', g)
@@ -160,7 +160,7 @@ class player:
                         g.cheating()
                     g.tentacle_TOKEN_locate.append(loc)
                     g.status = s
-                else: # TODO 童話編織者
+                else: # 童話編織者
                     s = g.status
                     g.status = state.APPEND_DESTINY_TOKEN
                     loc = svr.connectBot(g.nowid, 'int32_t', g)
@@ -192,7 +192,7 @@ class player:
                 if self.defenseSkill.cards[0] == 146:
                     self.identity.life += 5
                     self.identity.life = min(self.identity.maxlife, self.identity.life)
-                elif self.defenseSkill.cards[0] == 146: # TODO 暗潮湧動
+                elif self.defenseSkill.cards[0] == 146: # 暗潮湧動
                     s = g.status
                     g.status = state.CHOOSE_TENTACLE_LOCATION
                     loc = svr.connectBot(g.nowid, 'int32_t', g)
@@ -200,7 +200,7 @@ class player:
                         g.cheating()
                     g.tentacle_TOKEN_locate.append(loc)
                     g.status = s
-                else: # TODO 童話編織者
+                else: # 童話編織者
                     s = g.status
                     g.status = state.APPEND_DESTINY_TOKEN
                     loc = svr.connectBot(g.nowid, 'int32_t', g)
@@ -229,7 +229,7 @@ class player:
                 if self.moveSkill.cards[0] == 146:
                     self.identity.life += 5
                     self.identity.life = min(self.identity.maxlife, self.identity.life)
-                elif self.moveSkill.cards[0] == 146: # TODO 暗潮湧動
+                elif self.moveSkill.cards[0] == 146: # 暗潮湧動
                     s = g.status
                     g.status = state.CHOOSE_TENTACLE_LOCATION
                     loc = svr.connectBot(g.nowid, 'int32_t', g)
@@ -237,7 +237,7 @@ class player:
                         g.cheating()
                     g.tentacle_TOKEN_locate.append(loc)
                     g.status = s
-                else: # TODO 童話編織者
+                else: # 童話編織者
                     s = g.status
                     g.status = state.APPEND_DESTINY_TOKEN
                     loc = svr.connectBot(g.nowid, 'int32_t', g)
@@ -434,7 +434,7 @@ class game:
                     for i in range(len(self.tentacle_TOKEN_locate)):
                         self.tentacle_TOKEN_locate[i] = self.players[target].locate
     def getDamage(self,target:int,  dam:int):
-        #TODO done get Damage
+        # done get Damage
         c = self.players[target].identity.idx
         if c == 0: # 小紅帽
            pass

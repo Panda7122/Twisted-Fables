@@ -71,8 +71,8 @@ class mulanMOVSkill(movCard):
                 g.lostLife( g.nowid, posion)
 class mulanMETASkill(metaCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
-        pass
+        g.cheating()
+
 class mulanUltraSkill(ultraCard):
     def skill(self, g:game, level):
         if self.cardName == '氣沖雲霄':

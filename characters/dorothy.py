@@ -31,13 +31,12 @@ class dorothyDEFSkill(defCard):
     
 class dorothyMOVSkill(movCard):
     def skill(self, g:game, level):
-        g.damage(1-g.nowid,self.level+level, g.getRange()) # TODO confirm -1 or not
+        g.damage(1-g.nowid,self.level+level, g.getRange()) 
         lastAct = lastAction(0 ,0, 0, 0,[3, self.level, level])
         pass
 class dorothyMETASkill(metaCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
-        pass
+        g.cheating()
 class dorothyUltraSkill(ultraCard):
     def skill(self, g:game, level):
         t = g.players[g.nowid].identity.spendTOKEN(g)

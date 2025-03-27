@@ -62,12 +62,12 @@ class scheherazadeMOVSkill(movCard):
         pass
 class scheherazadeMETASkill(metaCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
-        pass
+        g.cheating()
+
 class scheherazadeUltraSkill(ultraCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
-        pass
+        g.cheating()
+
 class scheherazade(character):
     def idx():
         return 9
