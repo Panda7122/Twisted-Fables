@@ -161,7 +161,14 @@ class player:
                     g.tentacle_TOKEN_locate.append(loc)
                     g.status = s
                 else: # TODO 童話編織者
-                    pass
+                    s = g.status
+                    g.status = state.APPEND_DESTINY_TOKEN
+                    loc = svr.connectBot(g.nowid, 'int32_t', g)
+                    if loc not in [-1,-2,-3,1,2,3,4,5,6,7,8,9,10]:
+                        g.cheating()
+                    g.players[g.nowid].identity.destiny_TOKEN_locate.append(loc)
+                    g.players[g.nowid].identity.destiny_TOKEN_type.append(1)
+                    g.status = s
             else:
                 self.metamorphosis.append(self.attackSkill.cards[0])
             del self.attackSkill.cards[0]
@@ -194,7 +201,14 @@ class player:
                     g.tentacle_TOKEN_locate.append(loc)
                     g.status = s
                 else: # TODO 童話編織者
-                    pass
+                    s = g.status
+                    g.status = state.APPEND_DESTINY_TOKEN
+                    loc = svr.connectBot(g.nowid, 'int32_t', g)
+                    if loc not in [-1,-2,-3,1,2,3,4,5,6,7,8,9,10]:
+                        g.cheating()
+                    g.players[g.nowid].identity.destiny_TOKEN_locate.append(loc)
+                    g.players[g.nowid].identity.destiny_TOKEN_type.append(1)
+                    g.status = s
             else:
                 self.metamorphosis.append(self.defenseSkill.cards[0])
             del self.defenseSkill.cards[0]
@@ -224,7 +238,14 @@ class player:
                     g.tentacle_TOKEN_locate.append(loc)
                     g.status = s
                 else: # TODO 童話編織者
-                    pass
+                    s = g.status
+                    g.status = state.APPEND_DESTINY_TOKEN
+                    loc = svr.connectBot(g.nowid, 'int32_t', g)
+                    if loc not in [-1,-2,-3,1,2,3,4,5,6,7,8,9,10]:
+                        g.cheating()
+                    g.players[g.nowid].identity.destiny_TOKEN_locate.append(loc)
+                    g.players[g.nowid].identity.destiny_TOKEN_type.append(1)
+                    g.status = s
             else:
                 self.metamorphosis.append(self.moveSkill.cards[0])
             del self.moveSkill.cards[0]

@@ -94,7 +94,7 @@ typedef struct _player {
     // Scheherazade 9
     struct {
         vector destiny_TOKEN_locate;
-        vector destiny_TOKEN_type;
+        vector destiny_TOKEN_type;  // 1:blue, 2:red
         int8_t selectToken;
     } scheherazade;
 } player;
@@ -104,15 +104,14 @@ state                         return type  meaning
 CHOOSE_IDENTITY               int8_t       1:紅心皇后 2:瘋帽子 3:柴郡貓
 CHOOSE_TENTACLE_LOCATION      int32_t      tentacle location
 CHOOSE_SPECIAL_CARD           int32_t      special card id
-CHOOSE_DESTINY_TOKEN          int32_t      -1,-2,-3 meaning skill(atk/def/mov), 1~10 meaning basic(atk/def/mov/general) TODO MODIFY
+APPEND_DESTINY_TOKEN          int32_t      -1,-2,-3 meaning skill(atk/def/mov), 1~10 meaning basic(atk/def/mov/general) TODO MODIFY
 SET_TARGET_LOCATE_TO_NEARBY   int32_t      set location(1~9)
 CHOOSE_MOVE                   int32_t      choose moves
                                            (0:focus, 1-3:use basic cards(1:atk,2:def,3:mov),
                                             4:use a skill card, 5:use a special card, 6:buy a card,
                                             7:metamorphosis, 8:charactor special move,9:drop poison
                                             10:end)
-BUY_CARD_TYPE                 int32_t      -1,-2,-3 meaning skill(atk/def/mov), 1,2,3,4 meaning basic(atk/def/mov/general)
-BUY_CARD_LV                   int32_t      choose the card level you want to buy(lv1 2 or 3)
+BUY_CARD_TYPE                 int32_t      -1,-2,-3 meaning skill(atk/def/mov), 1~10 meaning basic(atk/def/mov/general)
 
 REMOVE_HG                     int32_t      for remove card, choose hand or graveyard(negtive:graveyard, positive:hand, value:index of card, **1 base**)
 DROP_H                        int32_t      for drop card, choose hand(value:index of card, **1 base**)

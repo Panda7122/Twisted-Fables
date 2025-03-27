@@ -118,29 +118,21 @@ class scheherazade(character):
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)
+    def triggerDestiny(self, g:game, cardType):
+        for i in range(len(self.destiny_TOKEN_locate)):
+            if self.destiny_TOKEN_locate[i] == cardType:
+                if self.destiny_TOKEN_type[i] == 2:
+                    self.destiny_TOKEN_type[i] = 1
+                    return
     def flipTOKEN(self, g:game):
         s = g.status
         g.status = state.FLIP_TOKEN_TO_RED
         loc = svr.connectBot(g.nowid, 'int8_t', g)
-        if loc not in [-1,-2, -3, 0, 1,2,3,4,5,6,7,8,9,10]:
-            g.cheating()
-        if loc<0:
-            if loc == -1:
-                if g.players[1-g.nowid].attackSkill.destiny_TOKEN  != 1:
-                    g.cheating()
-                g.players[1-g.nowid].attackSkill.destiny_TOKEN = 2
-            elif loc == -2:
-                if g.players[1-g.nowid].defenseSkill.destiny_TOKEN  != 1:
-                    g.cheating()
-                g.players[1-g.nowid].defenseSkill.destiny_TOKEN = 2
-            elif loc == -3:
-                if g.players[1-g.nowid].moveSkill.destiny_TOKEN  != 1:
-                    g.cheating()
-                g.players[1-g.nowid].moveSkill.destiny_TOKEN = 2
-        elif loc>0:
-            if g.basicBuyDeck[(loc-1)//3][(loc-1)%3].destiny_TOKEN  != 1:
+        if loc !=-1:
+            # return 0
+            if loc <0 or loc >= len(g.players[g.nowid].identity.destiny_TOKEN_locate):
                 g.cheating()
-            g.basicBuyDeck[(loc-1)//3][(loc-1)%3].destiny_TOKEN = 2
+            g.players[g.nowid].identity.destiny_TOKEN_type[loc] = 2
         g.status = s
         return loc
     def moveTOKEN(self, g:game):

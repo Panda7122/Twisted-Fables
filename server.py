@@ -188,11 +188,13 @@ def initializeGame(g:game):
                 for d in range(10):
                     g.basicBuyDeck[d].destiny_TOKEN=0
                 for _ in range(3):
-                    g.status = state.CHOOSE_DESTINY_TOKEN
+                    g.status = state.APPEND_DESTINY_TOKEN
                     loc = svr.connectBot(g.nowid, 'int32_t', g)
                     if loc not in [-1,-2,-3,1,2,3,4,5,6,7,8,9,10]:
                         g.cheating()
                     g.players[g.nowid].identity.destiny_TOKEN_locate.append(loc)
+                    g.players[g.nowid].identity.destiny_TOKEN_type.append(1)
+                    
         # draw card
         g.nowid = random.randint(0,1)
         for _ in range(4):
@@ -236,6 +238,21 @@ def main():
                 for m in g.players[g.nowid].metamorphosis:
                     if m == 154:
                         g.players[g.nowid].identity.KI_TOKEN += 1
+            elif g.players[g.nowid].identity.idx == 9:
+                for t in g.players[g.nowid].identity.destiny_TOKEN_type:
+                    if t == 2:
+                        g.lostLife(1-g.nowid, 1)
+                for i in range(len(g.players[g.nowid].identity.destiny_TOKEN_type)):
+                    g.players[g.nowid].identity.destiny_TOKEN_type[i] = 1
+                    g.players[g.nowid].identity.selectToken = i
+                    g.status = state.TOKEN_GOAL
+                    dloc = svr.connectBot(g.nowid, 'int8_t', g)
+                    if dloc not in [-1,-2,-3,1,2,3,4,5,6,7,8,9,10]:
+                        g.cheating()
+                    if dloc == g.players[g.nowid].identity.destiny_TOKEN_locate[idx]:
+                        g.cheating()
+                    g.players[g.nowid].identity.destiny_TOKEN_locate[idx] = dloc
+                    g.status = s
             # clean phase
             for i in range(len(g.players[g.nowid].usecards)):
                 g.players[g.nowid].graveyard.append(g.players[g.nowid].usecards[i])
@@ -310,6 +327,11 @@ def main():
                             g.players[g.nowid].identity.COMBO_TOKEN = min(12, g.players[g.nowid].identity.COMBO_TOKEN)
                     if g.players[g.nowid].identity.idx == 8:
                         g.players[g.nowid].identity.canCombo = 0
+                    if g.players[g.nowid].identity.idx == 9:
+                        if 173 in g.players[g.nowid].metamorphosis:
+                            if dam >= 3:
+                                g.players[g.nowid].identity.flipTOKEN(g)
+                            
                     lastAct = lastAction(g.nowATK,0, 0,dam, [])
                     g.nowATK = 0
                 elif select == 2: # basic def cards
@@ -461,7 +483,7 @@ def main():
                 elif select == 6: # buy a card
                     g.status = state.BUY_CARD_TYPE
                     ct = svr.connectBot(g.nowid, "int32_t", g)
-                    if(ct not in [-1,-2,-3,1,2,3,4]):
+                    if(ct not in [-1,-2,-3,1,2,3,4,5,6,7,8,9,10]):
                         g.cheating()
                     if(ct<0):
                         if ct == -1:
@@ -471,24 +493,24 @@ def main():
                         if ct == -3:
                             g.players[g.nowid].buyMOVCard()
                     else:
-                        if(ct == 4):
-                            lv = 1
-                        else:
-                            g.status = state.BUY_CARD_LV
-                            lv = svr.connectBot(g.nowid, "int32_t", g)
-                            if(lv not in [1,2,3]):
-                                g.cheating()
+                        lv = (ct-1)%3+1
+                        locate = (ct-1) // 3
                         if len(g.basicBuyDeck[ct-1][lv-1]) == 0:
                             g.cheating()
-                        pz = BASIC_PRIZE[ct-1][lv-1]
+                        pz = BASIC_PRIZE[locate][lv-1]
                         if g.players[g.nowid].identity.energy < pz:
                             g.cheating()
                         g.players[g.nowid].identity.energy -= pz
-                        cd = g.basicBuyDeck[ct-1][lv-1][0]
-                        del g.basicBuyDeck[ct-1][lv-1][0]
+                        cd = g.basicBuyDeck[locate][lv-1][0]
+                        del g.basicBuyDeck[locate][lv-1][0]
                         g.players[g.nowid].graveyard.append(cd)
-                        if g.players[1-g.nowid].identity.idx == 9 and (ct-1)*3+lv in  g.players[1-g.nowid].identity.destiny_TOKEN_locate != 0:
-                            g.players[1-g.nowid].identity.triggerDestiny(g, (ct-1)*3+lv)
+                    if g.players[1-g.nowid].identity.idx == 9 and ct in g.players[1-g.nowid].identity.destiny_TOKEN_locate :
+                        g.players[1-g.nowid].identity.triggerDestiny(g, ct)
+                    if g.players[1-g.nowid].identity.idx == 9 and 174 in g.players[1-g.nowid].metamorphosis:
+                        for loc in g.players[1-g.nowid].identity.destiny_TOKEN_locate:
+                            if loc == -3:
+                                if ct == loc:
+                                    g.lostLife(g.nowid, 1)
                 elif select == 7: # TODO metamorphosis
                     s = g.status
                     g.status = state.USE_METAMORPHOSIS
@@ -591,7 +613,21 @@ def main():
                 g.players[g.nowid].identity.KI_TOKEN -= add
                 cardNum += add
                 g.players[g.nowid].identity.extraCard = 0
-            
+            if g.players[1-g.nowid].identity.idx == 9 and 175 in g.players[1-g.nowid].metamorphosis:
+                top2 = g.players[g.nowid].deck[:2]
+                for i in range(1, -1, -1):
+                    if top2[i] <= 10:
+                        locateFrom = top2[i]
+                    elif top2[i] not in [131, 132,133,134]:
+                        locateFrom = -((((top2[i]-11)%12) // 3) + 1)
+                    else:
+                        continue
+                    if locateFrom == 4:
+                        continue
+                    for l in g.players[1-g.nowid].identity.destiny_TOKEN_locate:
+                        g.lostLife(g.nowid, 1)
+                        g.players[g.nowid].graveyard.append(g.players[g.nowid].deck[i])
+                        del g.players[g.nowid].deck[i]
             for _ in range(cardNum):
                 g.drawCard(g.nowid)
             if g.players[g.nowid].identity.idx == 3 and g.players[g.nowid].identity.restartTurn > 0:
