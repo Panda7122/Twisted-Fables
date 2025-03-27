@@ -66,8 +66,59 @@ class scheherazadeMETASkill(metaCard):
 
 class scheherazadeUltraSkill(ultraCard):
     def skill(self, g:game, level):
-        g.cheating()
-
+        if self.cardName == '系統刪除':
+            s = g.status
+            g.status = state.CHOOSE_TOKEN
+            idx = svr.connectBot(g.nowid, 'int8_t', g)
+            if idx ==-1:
+                return 0
+            if idx <0 or idx >= len(g.players[g.nowid].identity.destiny_TOKEN_locate):
+                g.cheating()
+            loc = g.players[g.nowid].identity.destiny_TOKEN_locate[idx]
+            X = 0
+            for i in range(len(g.players[1-g.nowid].deck)-1, -1, -1):
+                if g.players[1-g.nowid].deck[i] <= 10:
+                    locateFrom = g.players[1-g.nowid].deck[i]
+                elif g.players[1-g.nowid].deck[i] not in [131, 132,133,134]:
+                    locateFrom = -((((g.players[1-g.nowid].deck[i]-11)%12) // 3) + 1)
+                else:
+                    continue
+                if locateFrom == loc:
+                    g.players[1-g.nowid].graveyard.append(g.players[1-g.nowid].deck[i])
+                    del g.players[1-g.nowid].deck[i]
+                    X +=1
+            g.damage(3, X+3)
+            random.shuffle(g.players[1-g.nowid].deck)
+        elif self.cardName == '無法自拔':
+            s = g.status
+            g.status = state.CHOOSE_TOKEN
+            idx = svr.connectBot(g.nowid, 'int8_t', g)
+            if idx ==-1:
+                return 0
+            if idx <0 or idx >= len(g.players[g.nowid].identity.destiny_TOKEN_locate):
+                g.cheating()
+            loc = g.players[g.nowid].identity.destiny_TOKEN_locate[idx]
+            X = 0
+            for i in range(len(g.players[1-g.nowid].graveyard)-1, -1, -1):
+                if g.players[1-g.nowid].graveyard[i] <= 10:
+                    locateFrom = g.players[1-g.nowid].graveyard[i]
+                elif g.players[1-g.nowid].graveyard[i] not in [131, 132,133,134]:
+                    locateFrom = -((((g.players[1-g.nowid].graveyard[i]-11)%12) // 3) + 1)
+                else:
+                    continue
+                if locateFrom == loc:
+                    if g.players[g.nowid].identity.destiny_TOKEN_type[i]==2:
+                        X += 2
+                    else:
+                        X += 1
+            g.damage(1-g.nowid, 3, 3+X)
+        elif self.cardName == '切斷通路':
+            X = 0
+            for _ in range(3):
+                loc = g.players[g.nowid].identity.flipTOKEN(g)
+                if loc != -1:
+                    X += 1
+            g.damage(1-g.nowid, 3, X)
 class scheherazade(character):
     def idx():
         return 9
@@ -86,35 +137,35 @@ class scheherazade(character):
         self.destiny_TOKEN_type = destiny_TOKEN_type
         self.characterName = "山魯佐德"
         self.picture = "沒有圖片"
-        atklv1 =  scheherazadeATKSkill("沒有圖片", "", 1)
-        atklv2 =  scheherazadeATKSkill("沒有圖片", "", 2)
-        atklv3 =  scheherazadeATKSkill("沒有圖片", "", 3)
+        atklv1 =  scheherazadeATKSkill("沒有圖片", "消除夢境", 1)
+        atklv2 =  scheherazadeATKSkill("沒有圖片", "銷毀記憶", 2)
+        atklv3 =  scheherazadeATKSkill("沒有圖片", "扼殺存在", 3)
         self.attackSkill.append(atklv1)
         self.attackSkill.append(atklv2)
         self.attackSkill.append(atklv3)
-        deflv1 =  scheherazadeDEFSkill("沒有圖片", "", 1)
-        deflv2 =  scheherazadeDEFSkill("沒有圖片", "", 2)
-        deflv3 =  scheherazadeDEFSkill("沒有圖片", "", 3)
+        deflv1 =  scheherazadeDEFSkill("沒有圖片", "浸沒之網", 1)
+        deflv2 =  scheherazadeDEFSkill("沒有圖片", "沈迷之網", 2)
+        deflv3 =  scheherazadeDEFSkill("沒有圖片", "消融之網", 3)
         self.defenseSkill.append(deflv1)
         self.defenseSkill.append(deflv2)
         self.defenseSkill.append(deflv3)
-        movlv1 =  scheherazadeMOVSkill("沒有圖片", "", 1)
-        movlv2 =  scheherazadeMOVSkill("沒有圖片", "", 2)
-        movlv3 =  scheherazadeMOVSkill("沒有圖片", "", 3)
+        movlv1 =  scheherazadeMOVSkill("沒有圖片", "監視之眼", 1)
+        movlv2 =  scheherazadeMOVSkill("沒有圖片", "操縱之手", 2)
+        movlv3 =  scheherazadeMOVSkill("沒有圖片", "支配之腦", 3)
         self.moveSkill.append(movlv1)
         self.moveSkill.append(movlv2)
         self.moveSkill.append(movlv3)
-        meta1 =  scheherazadeMETASkill("沒有圖片", "", 0)
-        meta2 =  scheherazadeMETASkill("沒有圖片", "", 0)
-        meta3 =  scheherazadeMETASkill("沒有圖片", "", 0)
-        meta4 =  scheherazadeMETASkill("沒有圖片", "", 0)
+        meta1 =  scheherazadeMETASkill("沒有圖片", "命運之手", 0)
+        meta2 =  scheherazadeMETASkill("沒有圖片", "改寫欲望", 0)
+        meta3 =  scheherazadeMETASkill("沒有圖片", "重組思想", 0)
+        meta4 =  scheherazadeMETASkill("沒有圖片", "童話編織者", 0)
         self.metamorphosisSkill.append(meta1)
         self.metamorphosisSkill.append(meta2)
         self.metamorphosisSkill.append(meta3)
         self.metamorphosisSkill.append(meta4)
-        ultra1 =  scheherazadeUltraSkill("沒有圖片", "", 0)
-        ultra2 =  scheherazadeUltraSkill("沒有圖片", "", 0)
-        ultra3 =  scheherazadeUltraSkill("沒有圖片", "", 0)
+        ultra1 =  scheherazadeUltraSkill("沒有圖片", "系統刪除", 0)
+        ultra2 =  scheherazadeUltraSkill("沒有圖片", "無法自拔", 0)
+        ultra3 =  scheherazadeUltraSkill("沒有圖片", "切斷通路", 0)
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)
