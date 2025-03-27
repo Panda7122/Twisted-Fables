@@ -42,6 +42,8 @@ class kaguyaMETASkill(metaCard):
                         g.cheating()
                     if g.players[1-g.nowid].locate+lr > 9 or g.players[1-g.nowid].locate+lr < 1:
                         g.cheating()
+                    if g.players[1-g.nowid].locate+lr == g.players[g.nowid].locate:
+                        g.cheating()
                     g.players[1-g.nowid].locate+=lr
                     g.status = s
                 g.players[g.nowid].identity.useMoveTarget = 1

@@ -7,7 +7,7 @@ class snowWhiteATKSkill(atkCard):
         if g.getRange()> 1:
             g.cheating()
         dam = g.damage(1-g.nowid, 1, self.level+level)
-        if dam >=2 and vectorHave(g.players[g.nowid].metamorphosis, [139]):
+        if dam >=2 and 139 in g.players[g.nowid].metamorphosis:
             g.putPosion(1-g.nowid)
         for _ in range(self.level):
             g.dropDeck(1-g.nowid)

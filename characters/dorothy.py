@@ -11,7 +11,7 @@ class dorothyATKSkill(atkCard):
         afterDis = g.getRange()
         X = level - (afterDis-beforeDis)
         g.damage(1-g.nowid, 11, self.level + level+X)
-        pass
+        lastAct = lastAction(0 ,0, 0,0, [1, self.level, level])
 class dorothyDEFSkill(defCard):
     def skill(self, g:game, level):
         cnt = 1
@@ -26,11 +26,13 @@ class dorothyDEFSkill(defCard):
             del g.players[g.nowid].hand[drop]
         for _ in range(cnt):
             g.drawCard(g.nowid)
-        pass
+        lastAct = lastAction(0 ,0, 0,0, [2, self.level, level])
+        
     
 class dorothyMOVSkill(movCard):
     def skill(self, g:game, level):
-        g.damage(1-g.nowid,self.level+level, g.getRange()-1) # TODO confirm -1 or not
+        g.damage(1-g.nowid,self.level+level, g.getRange()) # TODO confirm -1 or not
+        lastAct = lastAction(0 ,0, 0, 0,[3, self.level, level])
         pass
 class dorothyMETASkill(metaCard):
     def skill(self, g:game, level):
@@ -38,7 +40,16 @@ class dorothyMETASkill(metaCard):
         pass
 class dorothyUltraSkill(ultraCard):
     def skill(self, g:game, level):
-        # TODO not implement yet
+        t = g.players[g.nowid].identity.spendTOKEN(g)
+        if self.cardName == '獅子':
+            g.damage(1-g.nowid, 1, t)
+            g.players[g.nowid].identity.energy += t
+        elif self.cardName == '鐵皮人':
+            g.players[g.nowid].identity.life += t
+            g.players[g.nowid].identity.life = min(g.players[g.nowid].identity.maxlife, g.players[g.nowid].identity.life)
+        elif self.cardName == '稻草人':
+            for _ in range((t+1)//2):
+                g.drawCard(g.nowid)
         pass
 class dorothy(character):
     def idx():
@@ -100,3 +111,12 @@ class dorothy(character):
         ret -= 1
         g.status = s
         return ret
+    def spendTOKEN(self, g:game):
+        s = g.status
+        g.status = state.SPEND_COMBO
+        c = svr.connectBot(g.nowid, 'int32_t', g)
+        if c < 0 or c > self.COMBO_TOKEN:
+            g.cheating()
+        self.COMBO_TOKEN -= c
+        g.status = s
+        return c

@@ -4,6 +4,7 @@ from game import *
 from character import *
 class littleRedATKSkill(atkCard):
     def skill(self, g:game, level,X=-1,Y=-1):
+        global lastAct
         if g.getRange()> self.level:
             g.cheating()
         if X == -1 and Y == -1:
@@ -52,16 +53,19 @@ class littleRedATKSkill(atkCard):
             else:
                 Y = 0
         g.damage(1-g.nowid, self.level+Y, self.level+level+X)
-        lastAct = lastAction(0 ,0, 0, [1, self.level, X, Y])
+        lastAct = lastAction(0 ,0, 0,0, [1, self.level, level, X, Y])
 class littleRedDEFSkill(defCard):
     def skill(self, g:game, level):
+        global lastAct
         if g.getRange()> self.level:
             g.cheating()
         g.damage(1-g.nowid, self.level, self.level)
         g.players[g.nowid].defense+=1
         g.players[g.nowid].defense = min(g.players[g.nowid].maxdefense, g.players[g.nowid].defense)
+        lastAct = lastAction(0 ,0, 0,0, [2, self.level, level, -1,-1])
 class littleRedMOVSkill(movCard):
     def skill(self, g:game, level, X=-1, Y=-1):
+        global lastAct
         if g.getRange()> self.level:
             g.cheating()
         if X == -1 and Y == -1:
@@ -115,7 +119,7 @@ class littleRedMOVSkill(movCard):
         if dis > self.level or dis < 0:
             g.cheating()
         g.knockback(dis)
-        lastAct = lastAction(0 ,0, 0, [3, self.level, X,Y])
+        lastAct = lastAction(0 ,0, 0,0, [3, self.level, level, X,Y])
 class littleRedMETASkill(metaCard):
     def skill(self, g:game, level):
         if self.cardName == '板載緩存':
@@ -186,20 +190,20 @@ class littleRedUltraSkill(ultraCard):
                 dir = g.chooseMovingDir()
                 through = g.moveCharacter( dir, g.nowMOV)
                 if through:
-                    if g.players[1-g.nowid].identity.idx == 3 and g.players[1-g.nowid].identity.identity == 3 and vectorHave(g.players[1-g.nowid].metamorphosis, [149]):
+                    if g.players[1-g.nowid].identity.idx == 3 and g.players[1-g.nowid].identity.identity == 3 and 149 in g.players[1-g.nowid].metamorphosis:
                         g.drawCard( 1-g.nowid)
-                    elif g.players[g.nowid].identity.idx == 3 and g.players[g.nowid].identity.identity == 3 and vectorHave(g.players[g.nowid].metamorphosis, [149]):
+                    elif g.players[g.nowid].identity.idx == 3 and g.players[g.nowid].identity.identity == 3 and 149 in g.players[g.nowid].metamorphosis:
                         g.drawCard( g.nowid)
-                    elif g.players[1-g.nowid].identity.idx == 1 and vectorHave(g.players[1-g.nowid].metamorphosis, [141]):
+                    elif g.players[1-g.nowid].identity.idx == 1 and 141 in g.players[1-g.nowid].metamorphosis:
                         g.putPosion( g.nowid)
-                    elif g.players[g.nowid].identity.idx == 1 and vectorHave(g.players[g.nowid].metamorphosis, [141]):
+                    elif g.players[g.nowid].identity.idx == 1 and 141 in g.players[g.nowid].metamorphosis:
                         g.putPosion( 1-g.nowid)
                 g.players[g.nowid].identity.energy+=lastAct.mov
             elif len(lastAct.useskill) != 0:
                 if lastAct.useskill[0][0] == 1:
-                    g.players[g.nowid].identity.attackSkill[lastAct.useskill[0][1]].skill(g, lastAct.useskill[0][2], lastAct.useskill[0][3])
+                    g.players[g.nowid].identity.attackSkill[lastAct.useskill[0][1]].skill(g, lastAct.useskill[0][2], lastAct.useskill[0][3], lastAct.useskill[0][4])
                 elif lastAct.useskill[0][0] == 3:
-                    g.players[g.nowid].identity.moveSkill[lastAct.useskill[0][1]].skill(g, lastAct.useskill[0][2], lastAct.useskill[0][3])
+                    g.players[g.nowid].identity.moveSkill[lastAct.useskill[0][1]].skill(g, lastAct.useskill[0][2], lastAct.useskill[0][3], lastAct.useskill[0][4])
                 else:
                     g.cheating()
             else:

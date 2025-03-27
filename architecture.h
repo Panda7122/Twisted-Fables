@@ -125,6 +125,7 @@ USE_SKILL                     int32_t      for use skill card, choose hand(value
 TRIGGER_COMBO                 int8_t       0:NO 1:YES(you dont need to implement this if you didn't implement dorothy)
 USEBASIC                      int32_t      for use skill card, choose basic card from hand(value:index of card, **1 base**)
 KNOCKBACK                     int32_t      knockback enemy distanse(hint:check avilable value on player's last use card)
+MOVE_TARGET                   int32_t      move target(return locate after move)
 
 PUTTARGETPOSITION             int32_t      choose number of posion you want to push to target's deck(hint:check avilable value on player's last use card and skill that you used)
 SHUFFLEPOSIONTODECK           int8_t       shuffle posion to deck instead of put into graveyard(1:yes, 0:no)
@@ -151,7 +152,7 @@ CHOOSE_MOVE_NEARBY            int8_t       move to the locate next to target(-1:
 
 KEEP_OR_BACK                  int8_t       keep the card or drop it(1:keep, 0:drop, the card store in nowusingCardID)
 LOST_LIFE_FOR_REMOVECARD      int8_t       kaguya's skill, (1:lost, 0:no)
-MOVE_TARGET                   int8_t       kaguya's move metamorphosis(-1:left, 1:right)
+MOVE_TARGET                   int8_t       kaguya's move metamorphosis(-n:left, n:right, n is distance)
 
 MOVE_TO_TANTACLE              int32_t      locate you choose(should in tentacle_TOKEN_locate or your original locate)
 CHOOSE_TANTACLE               int32_t      choose a tantacle
@@ -162,6 +163,8 @@ SPEND_ENERGY                  int32_t      spend energy for rise the atk(0 is me
 SPEND_LIFE                    int32_t      spend life for draw card(0 is meaning not use)
 RECYCLE_MATCH                 int32_t      get back the match from target's graveyard(check the max value you can recycle from target's graveyard and the card you use)
 DROP_CARD                     int32_t      choose a card to drop/save(0 is end, 1 base)
+SPEND_COMBO                   int32_t      spend combo token for ultra skill(send number of tokens you use)
+
 FLIP_TOKEN_TO_RED             int8_t       -1,-2,-3 meaning skill(atk/def/mov), 1~10 meaning basic(atk/def/mov/general), 0 is not flip
 CHOOSE_TOKEN                  int8_t       choose a destiny token for action(index of tokens, -1 is give up)
 TOKEN_GOAL                    int8_t       choose location of the token you choose for moving(-1,-2,-3 meaning skill(atk/def/mov), 1~10 meaning basic(atk/def/mov/general))

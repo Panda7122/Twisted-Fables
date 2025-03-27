@@ -49,11 +49,11 @@ class aliceMOVSkill(movCard):
         if through:
             for _ in range(self.level):
                 g.drawCard( g.nowid)
-            if g.players[1-g.nowid].identity.idx == 3 and g.players[1-g.nowid].identity.identity == 3 and vectorHave(g.players[1-g.nowid].metamorphosis, [149]):
+            if g.players[1-g.nowid].identity.idx == 3 and g.players[1-g.nowid].identity.identity == 3 and 149 in g.players[1-g.nowid].metamorphosis:
                 g.drawCard( 1-g.nowid)
-            elif g.players[g.nowid].identity.idx == 3 and g.players[g.nowid].identity.identity == 3 and vectorHave(g.players[g.nowid].metamorphosis, [149]):
+            elif g.players[g.nowid].identity.idx == 3 and g.players[g.nowid].identity.identity == 3 and 149 in g.players[g.nowid].metamorphosis:
                 g.drawCard( g.nowid)
-            elif g.players[1-g.nowid].identity.idx == 1 and vectorHave(g.players[1-g.nowid].metamorphosis, [141]):
+            elif g.players[1-g.nowid].identity.idx == 1 and 141 in g.players[1-g.nowid].metamorphosis:
                 g.putPosion( g.nowid)
                     
         s = g.status 

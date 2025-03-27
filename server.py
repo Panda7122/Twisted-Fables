@@ -179,8 +179,8 @@ def initializeGame(g:game):
                 g.players[p].deck.append(card)
                 random.shuffle(g.players[p].deck)
                 
-                g.players[p].dorothy.COMBO_TOKEN = 0
-                g.players[p].dorothy.canCombo = False
+                g.players[p].identity.COMBO_TOKEN = 0
+                g.players[p].identity.canCombo = False
             elif c == 9: # 山魯佐德
                 g.players[1-g.nowid].attackSkill.destiny_TOKEN=0
                 g.players[1-g.nowid].defenseSkill.destiny_TOKEN=0
@@ -204,6 +204,7 @@ def initializeGame(g:game):
 def triggerCardSkill(g:game, cardID:int, level:int):
     if (cardID-11)%12 < 3: # attack skill
         g.players[g.nowid].identity.attackSkill[(cardID-11)%3].skill(g, level)
+        
     elif (cardID-11)%12 < 6: # defense skill
         g.players[g.nowid].identity.defenseSkill[(cardID-14)%3].skill(g, level)
     elif (cardID-11)%12 < 9: # move skill
@@ -214,6 +215,7 @@ def triggerCardSkill(g:game, cardID:int, level:int):
     else:#ultra
         g.players[g.nowid].identity.ultraSkill[(cardID-17)%3].skill(g, level)
 def main():
+    global lastAct
     svr.accept()
 
     g = game()
@@ -296,9 +298,19 @@ def main():
                         dam = g.damage(1-g.nowid, 18, g.nowATK)
                     else:
                         dam = g.damage(1-g.nowid, 1, g.nowATK)
-                    if g.players[g.nowid].identity.idx == 1 and dam >=2 and vectorHave(g.players[g.nowid].metamorphosis, [139]):
+                    if g.players[g.nowid].identity.idx == 1 and dam >=2 and 139 in g.players[g.nowid].metamorphosis:
                         g.putPosion( 1-g.nowid)
-                    lastAct.atk = lastAction(g.nowATK,0, 0, [])
+                    if g.players[g.nowid].identity.idx ==8 and 169 in g.players[g.nowid].metamorphosis and lastAct.dam != 0:
+                        if dam > lastAct.dam:
+                            c = 1
+                            for m in g.players[g.nowid]:
+                                if m == 169:
+                                    c+=1
+                            g.players[g.nowid].identity.COMBO_TOKEN += c
+                            g.players[g.nowid].identity.COMBO_TOKEN = min(12, g.players[g.nowid].identity.COMBO_TOKEN)
+                    if g.players[g.nowid].identity.idx == 8:
+                        g.players[g.nowid].identity.canCombo = 0
+                    lastAct = lastAction(g.nowATK,0, 0,dam, [])
                     g.nowATK = 0
                 elif select == 2: # basic def cards
                     # choose a basic card from hand
@@ -306,7 +318,9 @@ def main():
                     if g.players[g.nowid].identity.idx != 2 or g.players[g.nowid].identity.AWAKEN != 1: 
                         g.players[g.nowid].identity.defense +=g.nowDEF
                         g.players[g.nowid].identity.defense = min(g.players[g.nowid].defense, g.players[g.nowid].maxdefense)
-                    lastAct.atk = lastAction(0, g.nowDEF, 0, [])
+                    lastAct = lastAction(0, g.nowDEF, 0,0, [])
+                    if g.players[g.nowid].identity.idx == 8:
+                        g.players[g.nowid].identity.canCombo = 0
                     g.nowDEF = 0
                 elif select == 3: # basic mov cards
                     # choose a basic card from hand
@@ -323,17 +337,19 @@ def main():
                         g.nowMOV += K
                     through = g.moveCharacter( dir, g.nowMOV)
                     if through:
-                        if g.players[1-g.nowid].identity.idx == 3 and g.players[1-g.nowid].identity.identity == 3 and vectorHave(g.players[1-g.nowid].metamorphosis, [149]):
+                        if g.players[1-g.nowid].identity.idx == 3 and g.players[1-g.nowid].identity.identity == 3 and 149 in g.players[1-g.nowid].metamorphosis:
                             g.drawCard( 1-g.nowid)
-                        elif g.players[g.nowid].identity.idx == 3 and g.players[g.nowid].identity.identity == 3 and vectorHave(g.players[g.nowid].metamorphosis, [149]):
+                        elif g.players[g.nowid].identity.idx == 3 and g.players[g.nowid].identity.identity == 3 and  149 in g.players[g.nowid].metamorphosis:
                             g.drawCard( g.nowid)
-                        elif g.players[1-g.nowid].identity.idx == 1 and vectorHave(g.players[1-g.nowid].metamorphosis, [141]):
+                        elif g.players[1-g.nowid].identity.idx == 1 and 141 in g.players[1-g.nowid].metamorphosis:
                             g.putPosion( g.nowid)
-                        elif g.players[g.nowid].identity.idx == 1 and vectorHave(g.players[g.nowid].metamorphosis, [141]):
+                        elif g.players[g.nowid].identity.idx == 1 and  141 in g.players[g.nowid].metamorphosis:
                             g.putPosion( 1-g.nowid)
-                    lastAct.atk = lastAction(0, 0,g.nowMOV, [])
+                    lastAct = lastAction(0, 0,g.nowMOV, 0,[])
                     if g.players[g.nowid].identity.idx == 6 and 161 in g.players[g.nowid].metamorphosis:
                         g.players[g.nowid].identity.moveTantacle(g, g.nowMOV//2, 0)
+                    if g.players[g.nowid].identity.idx == 8:
+                        g.players[g.nowid].identity.canCombo = 0
                     g.nowMOV = 0
                 elif select == 4: # use a skill
                     # choose a skill card from hand
@@ -343,7 +359,7 @@ def main():
                         g.cheating()
                     g.nowUsingCardID = card
                     # if is dorothy
-                    if g.players[g.nowid].identity.idx == 8 and g.players[g.nowid].dorothy.canCombo:
+                    if g.players[g.nowid].identity.idx == 8 and g.players[g.nowid].identity.canCombo:
                         # ask combo
                         s = g.status
                         g.status = state.TRIGGER_COMBO
@@ -356,6 +372,16 @@ def main():
                             level = g.USEBASIC()
                         else:
                             level = 0
+                            t = 1
+                            for m in g.players[g.nowid].metamorphosis:
+                                if m == 172:
+                                    t+=1
+                            g.players[g.nowid].identity.COMBO_TOKEN += t
+                            
+                            if 170 in g.players[g.nowid].metamorphosis and lastAct.useskill != []:
+                                if (card-11%3)+1 > lastAct.useskill[0][1]:
+                                    g.players[g.nowid].identity.COMBO_TOKEN += 1
+                            g.players[g.nowid].identity.COMBO_TOKEN = min(12, g.players[g.nowid].identity.COMBO_TOKEN)
                     else:
                         # choose a basic card from hand
                         if g.players[g.nowid].identity.idx == 2 and 143 in  g.players[g.nowid].metamorphosis and g.players[g.nowid].usedmeta1 == 0:
@@ -373,7 +399,55 @@ def main():
                                 g.cheating()
                         else:
                             level = g.USEBASIC()
+                            if g.players[g.nowid].identity.idx == 8:
+                                g.players[g.nowid].identity.canCombo = 1
                     triggerCardSkill(g, g.nowUsingCardID, level)
+                    if g.players[g.nowid].identity.idx == 8 and 171 in g.players[g.nowid].metamorphosis:
+                        total = 0
+                        u = g.nowUsingCardID
+                        while 1:
+                            d = g.dropCardFromHand()
+                            if d == -1:
+                                break
+                            basic =[7,8,9,10]
+                            if g.players[1-g.nowid].identity.idx == 7 and 168 not in g.players[1-g.nowid].metamorphosis:
+                                basic.append(134)
+                            if d not in basic:
+                                g.cheating()
+                            if g.players[g.nowid].hand[card] in [10,134]:
+                                total += 1 
+                            else:
+                                total += basic-6 
+                            if g.players[g.nowid].hand[card] == 134:
+                                eneragy = 1
+                                for i in range(len(g.players[1-g.nowid].metamorphosis)):
+                                    if g.players[1-g.nowid].metamorphosis[i] in [166,167,168]:
+                                        eneragy+=1
+                                g.players[1-g.nowid].energy += eneragy
+                        s = g.status
+                        g.status = state.MOVE_TARGET
+                        lr = svr.connectBot(g.nowid, 'int8_t', g)
+                        if lr == 0 or abs(lr) >total:
+                            g.cheating()
+                        if g.players[1-g.nowid].locate+lr > 9 or g.players[1-g.nowid].locate+lr < 1:
+                            g.cheating()
+                        if g.players[1-g.nowid].locate+lr == g.players[g.nowid].locate:
+                            g.cheating()
+                        if (g.players[1-g.nowid].locate>g.players[g.nowid].locate and g.players[1-g.nowid].locate+lr < g.players[g.nowid].locate )or \
+                            (g.players[1-g.nowid].locate<g.players[g.nowid].locate and g.players[1-g.nowid].locate+lr > g.players[g.nowid].locate):
+                            if g.players[1-g.nowid].identity.idx == 3 and g.players[1-g.nowid].identity.identity == 3 and 149 in g.players[1-g.nowid].metamorphosis:
+                                g.drawCard( 1-g.nowid)
+                            elif g.players[g.nowid].identity.idx == 3 and g.players[g.nowid].identity.identity == 3 and  149 in g.players[g.nowid].metamorphosis:
+                                g.drawCard( g.nowid)
+                            elif g.players[1-g.nowid].identity.idx == 1 and 141 in g.players[1-g.nowid].metamorphosis:
+                                g.putPosion( g.nowid)
+                            elif g.players[g.nowid].identity.idx == 1 and  141 in g.players[g.nowid].metamorphosis:
+                                g.putPosion( 1-g.nowid)
+                        g.players[1-g.nowid].locate+=lr
+                        g.status = s 
+                        g.nowUsingCardID = u
+                        
+                            
                     g.nowUsingCardID = 0
                 elif select == 5: # TODO use a special card
                     card = g.USESKILL()
@@ -449,13 +523,14 @@ def main():
                 moved = True
                 if g.players[g.nowid].identity.idx == 8:
                     if select in [0,1,2,3,5,6]:
-                        g.players[g.nowid].dorothy.canCombo = 0
+                        g.players[g.nowid].identity.canCombo = 0
             # end phase
             g.players[g.nowid].energy = 0
             g.nowATK = 0
             g.nowDEF = 0
             g.nowMOV = 0
             g.nowUsingCardID = 0
+            lastAct = lastAction()
             for i in range(len(g.players[g.nowid].usecards)):
                 if g.players[g.nowid].usecards[i] not in [14,15,16,
                                                           45,

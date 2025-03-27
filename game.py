@@ -15,6 +15,7 @@ class lastAction:
     atk:int = 0
     defense:int = 0
     mov:int = 0
+    dam:int = 0
     useskill:list[tuple[int]] = []
 lastAct:lastAction
 
@@ -385,13 +386,22 @@ class game:
             use = self.players[target].identity.useSpecialMove(self)
             if use == 1:
                 card = self.players[target].identity.specialMove(self)
-                if self.players[target].hand[card] not in [1,2,3,10]:
+                basic = [1,2,3,10]
+                if self.players[1-target].identity.idx == 7 and 166 not in self.players[1-target].metamorphosis:
+                    basic.append(134)
+                if self.players[target].hand[card] not in basic:
                     self.cheating()
-                if self.players[target].hand[card] == 10:
+                if self.players[target].hand[card] in [10,134]:
                     lv = 1
                 else :
                     lv = self.players[target].hand[card]
                 self.players[target].graveyard.append(self.players[target].hand[card])
+                if self.players[target].hand[card] == 134:
+                    eneragy = 1
+                    for i in range(len(self.players[1-target].metamorphosis)):
+                        if self.players[1-target].metamorphosis[i] in [166,167,168]:
+                            eneragy+=1
+                    self.players[1-target].energy += eneragy
                 del self.players[target].hand[card]
                 self.damage(1-target, 11, lv)
                 self.drawCard(target)
@@ -457,15 +467,24 @@ class game:
                 if card <-1 or card >= len(self.players[target].hand):
                     self.cheating()
                 if card != -1:
-                    if self.players[target].hand[card] not in [4,5,6,10]:
+                    basic =[4,5,6,10]
+                    if self.players[1-target].identity.idx == 7 and 167 not in self.players[1-target].metamorphosis:
+                        basic.append(134)
+                    if self.players[target].hand[card] not in basic:
                         self.cheating()
-                    if self.players[target].hand[card] == 10:
+                    if self.players[target].hand[card] in [10, 134] :
                         lv = 1
                     else :
                         lv = self.players[target].hand[card]-3
                     dam -= lv
                     self.players[target].identity.KI_TOKEN += lv
                     self.players[target].graveyard.append(self.players[target].hand[card])
+                    if self.players[target].hand[card] == 134:
+                        eneragy = 1
+                        for i in range(len(self.players[1-target].metamorphosis)):
+                            if self.players[1-target].metamorphosis[i] in [166,167,168]:
+                                eneragy+=1
+                        self.players[1-target].energy += eneragy
                     del self.players[target].hand[card]
                 self.nowid = 1-self.nowid
             if self.players[target].identity.idx == 6:
@@ -627,7 +646,7 @@ class game:
             basicATK.append(83)
             basicATK.append(84)
             basicATK.append(85)
-        if self.players[1-self.nowid].identity.idx == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [166]):
+        if self.players[1-self.nowid].identity.idx == 7 and 166 not in self.players[1-self.nowid].metamorphosis:
             basicATK.append(134)
         while True:
             if self.players[self.nowid].identity.idx == 2 and 143 in  self.players[self.nowid].metamorphosis and self.players[self.nowid].usedmeta1 == 0:
@@ -689,7 +708,7 @@ class game:
         self.status = state.USE_DEF
         self.nowDEF = 0
         basicDEF = [4,5,6, 10]
-        if self.players[1-self.nowid].identity.idx == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [167]):
+        if self.players[1-self.nowid].identity.idx == 7 and 167 not in self.players[1-self.nowid].metamorphosis:
             basicDEF.append(134)
         if self.players[self.nowid].identity.idx == 6 and 93 in self.players[self.nowid].metamorphosis:
             basicDEF.append(86)
@@ -750,7 +769,7 @@ class game:
         self.status = state.USE_MOV
         self.nowMOV = 0
         basicMOV = [7,8,9, 10]
-        if self.players[1-self.nowid].identity.idx == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [168]):
+        if self.players[1-self.nowid].identity.idx == 7 and 168 not in self.players[1-self.nowid].metamorphosis:
             basicMOV.append(134)
         if self.players[self.nowid].identity.idx == 6 and 93 in self.players[self.nowid].metamorphosis:
             basicMOV.append(89)
@@ -827,15 +846,15 @@ class game:
         typeC = self.nowUsingCardID - 11 - 12*self.players[self.nowid].identity.idx
         if typeC == [0,1,2]:
             basic = [1,2,3]
-            if self.players[1-self.nowid].identity.idx == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [166]):
+            if self.players[1-self.nowid].identity.idx == 7 and 166 not in self.players[1-self.nowid].metamorphosis:
                 basic.append(134)
         elif typeC == [3,4,5]:
             basic = [4,5,6]
-            if self.players[1-self.nowid].identity.idx == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [167]):
+            if self.players[1-self.nowid].identity.idx == 7 and 167 not in self.players[1-self.nowid].metamorphosis:
                 basic.append(134)
         elif typeC == [6,7,8]:
             basic = [7,8,9]
-            if self.players[1-self.nowid].identity.idx == 7 and not vectorHave(self.players[1-self.nowid].metamorphosis, [168]):
+            if self.players[1-self.nowid].identity.idx == 7 and 168 not in self.players[1-self.nowid].metamorphosis:
                 basic.append(134)
         if c >= len(self.players[self.nowid].hand) or c < 0 or self.players[self.nowid].hand[c] not in basic:
             # cheat
@@ -891,11 +910,6 @@ class game:
             if loc not in [self.players[self.nowid].locate+1, self.players[self.nowid].locate-1] or loc<1 or loc>9:
                 self.cheating()
         self.players[1-self.nowid].locate = loc
-def vectorHave(vec:list, ls:list):
-    for i in range(len(vec)):
-        if vec[i] in ls:
-            return True
-    return False
 @dataclasses.dataclass
 class skillCard:
     picture:str
