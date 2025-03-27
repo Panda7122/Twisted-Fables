@@ -82,6 +82,7 @@ typedef struct _player {
     // Match Girl 7
     struct {
         uint32_t remindMatch;
+        uint32_t pushedMatch;
     } matchGirl;
 
     // dorothy 8

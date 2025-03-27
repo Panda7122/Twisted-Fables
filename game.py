@@ -80,6 +80,7 @@ class player:
             pass
         elif self.identity.idx == 7:
             ret.matchGirl.remindMatch = self.identity.remindMatch
+            ret.matchGirl.pushedMatch = self.identity.pushedMatch
         elif self.identity.idx == 8:
             ret.dorothy.COMBO_TOKEN = self.identity.COMBO_TOKEN
             ret.dorothy.canCombo = self.identity.canCombo
@@ -107,6 +108,7 @@ class player:
                     "useDefenseAsATK":p.kaguya.useDefenseAsATK,
                     "useMoveTarget":p.kaguya.useMoveTarget,
                     "remindMatch":p.matchGirl.remindMatch,
+                    "pushedMatch":p.matchGirl.pushedMatch,
                     "COMBO_TOKEN":p.dorothy.COMBO_TOKEN,
                     "canCombo":p.dorothy.canCombo,
                     "destiny_TOKEN_locate":p.scheherazade.destiny_TOKEN_locate.to_list(),
@@ -369,38 +371,16 @@ class game:
                         min(6,self.players[target].identity.AWAKEN_TOKEN+dam))
                 if self.players[target].identity.AWAKEN_TOKEN == 6:
                     self.players[target].identity.AWAKEN = 1
-            pass
-        elif c == 3: # 愛麗絲
-            pass
-        elif c == 4: # 花木蘭
-            pass
-        elif c == 5: # 輝夜姬
-            pass
-        elif c == 6: # 美人魚
-            pass
-        elif c == 7: # 火柴女孩
-            pass
-        elif c == 8: # 桃樂絲
-            pass
-        elif c == 9: # 山魯佐德
-            pass
-        
-        if target == 0: # 小紅帽
-            pass
-        elif target == 1: # 白雪公主
-            pass
-        elif target == 2: # 睡美人
             for i in range(len(self.players[1-self.nowid].usecards)):
                 if self.players[1-self.nowid].usecards[i] == 45:
                     for _ in range(min(self.players[1-self.nowid].identity.dayNightmareDrawRemind, dam)):
                         self.drawCard(target)
                     self.players[1-self.nowid].identity.dayNightmareDrawRemind-=min(self.players[1-self.nowid].identity.dayNightmareDrawRemind, dam)
+        elif c == 3: # 愛麗絲
             pass
-        elif target == 3: # 愛麗絲
+        elif c == 4: # 花木蘭
             pass
-        elif target == 4: # 花木蘭
-            pass
-        elif target == 5: # 輝夜姬
+        elif c == 5: # 輝夜姬
             self.nowid = 1-self.nowid
             use = self.players[target].identity.useSpecialMove(self)
             if use == 1:
@@ -416,19 +396,26 @@ class game:
                 self.damage(1-target, 11, lv)
                 self.drawCard(target)
             self.nowid = 1-self.nowid
-        elif target == 6: # 美人魚
+        elif c == 6: # 美人魚
             pass
-        elif target == 7: # 火柴女孩
+        elif c == 7: # 火柴女孩
+            if 165 in self.players[target].metamorphosis:
+                r = self.players[target].identity.recycle_match(self, 1)
+                if r == 1:
+                    self.nowid= 1-self.nowid
+                    dir = self.chooseMovingDir()
+                    self.moveCharacter(dir, 1)
+                    self.nowid= 1-self.nowid
+        elif c == 8: # 桃樂絲
             pass
-        elif target == 8: # 桃樂絲
+        elif c == 9: # 山魯佐德
             pass
-        elif target == 9: # 山魯佐德
-            pass
+        
     def damage(self, target:int,  distanse:int, atk:int):
         for i in range(len(self.players[target].usecards)):
             if self.players[target].usecards[i] == 80:
                 return
-        if(self.getRange()<=distanse):
+        if(self.nowid == target or self.getRange()<=distanse):
             if self.players[target].identity.idx == 6 and 93 in self.players[target].metamorphosis:
                 s = 0
                 for l in self.tentacle_TOKEN_locate:
@@ -612,6 +599,7 @@ class game:
                 if self.players[1-self.nowid].metamorphosis[i] == 142:
                     posion+=1
             self.lostLife( self.nowid, posion)
+        return top
     def USEPOSION(self, g):
         s = self.status
         self.status = state.USE_POSION

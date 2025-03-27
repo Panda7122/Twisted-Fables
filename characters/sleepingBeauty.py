@@ -32,7 +32,7 @@ class sleepingBeautyMOVSkill(movCard):
             q = g.players[g.nowid].identity.askUseAWAKENTOKEN(g)
         else:
             q = 0
-        g.damage(1-g.now, self.level+1, level + q)
+        g.damage(1-g.nowid, self.level+1, level + q)
         g.knockback(-min(g.getRange()-1, level))
         pass
 class sleepingBeautyMETASkill(metaCard):
@@ -74,36 +74,37 @@ class sleepingBeauty(character):
         self.usedmeta1 = usedmeta1
         self.usedmeta2 = usedmeta2
         self.characterName = "睡美人"
-        self.picture = "沒有圖片"
-        atklv1 =  sleepingBeautyATKSkill("沒有圖片", "", 1)
-        atklv2 =  sleepingBeautyATKSkill("沒有圖片", "", 2)
-        atklv3 =  sleepingBeautyATKSkill("沒有圖片", "", 3)
+        self.picture = "沒有圖片\n\
+                        沒有圖片"
+        atklv1 =  sleepingBeautyATKSkill("沒有圖片", "心靈震顫", 1)
+        atklv2 =  sleepingBeautyATKSkill("沒有圖片", "心靈之怒", 2)
+        atklv3 =  sleepingBeautyATKSkill("沒有圖片", "心靈狂怒", 3)
         self.attackSkill.append(atklv1)
         self.attackSkill.append(atklv2)
         self.attackSkill.append(atklv3)
-        deflv1 =  sleepingBeautyDEFSkill("沒有圖片", "", 1)
-        deflv2 =  sleepingBeautyDEFSkill("沒有圖片", "", 2)
-        deflv3 =  sleepingBeautyDEFSkill("沒有圖片", "", 3)
+        deflv1 =  sleepingBeautyDEFSkill("沒有圖片", "爆裂之鎖", 1)
+        deflv2 =  sleepingBeautyDEFSkill("沒有圖片", "爆裂之骨", 2)
+        deflv3 =  sleepingBeautyDEFSkill("沒有圖片", "爆裂之魂", 3)
         self.defenseSkill.append(deflv1)
         self.defenseSkill.append(deflv2)
         self.defenseSkill.append(deflv3)
-        movlv1 =  sleepingBeautyMOVSkill("沒有圖片", "", 1)
-        movlv2 =  sleepingBeautyMOVSkill("沒有圖片", "", 2)
-        movlv3 =  sleepingBeautyMOVSkill("沒有圖片", "", 3)
+        movlv1 =  sleepingBeautyMOVSkill("沒有圖片", "黑暗碰觸", 1)
+        movlv2 =  sleepingBeautyMOVSkill("沒有圖片", "黑暗糾纏", 2)
+        movlv3 =  sleepingBeautyMOVSkill("沒有圖片", "黑暗絞殺", 3)
         self.moveSkill.append(movlv1)
         self.moveSkill.append(movlv2)
         self.moveSkill.append(movlv3)
-        meta1 =  sleepingBeautyMETASkill("沒有圖片", "", 0)
-        meta2 =  sleepingBeautyMETASkill("沒有圖片", "", 0)
-        meta3 =  sleepingBeautyMETASkill("沒有圖片", "", 0)
-        meta4 =  sleepingBeautyMETASkill("沒有圖片", "", 0)
+        meta1 =  sleepingBeautyMETASkill("沒有圖片", "放血療法", 0)
+        meta2 =  sleepingBeautyMETASkill("沒有圖片", "血祭之禮", 0)
+        meta3 =  sleepingBeautyMETASkill("沒有圖片", "精神屏障", 0)
+        meta4 =  sleepingBeautyMETASkill("沒有圖片", "強制治療", 0)
         self.metamorphosisSkill.append(meta1)
         self.metamorphosisSkill.append(meta2)
         self.metamorphosisSkill.append(meta3)
         self.metamorphosisSkill.append(meta4)
-        ultra1 =  sleepingBeautyUltraSkill("沒有圖片", "", 0)
-        ultra2 =  sleepingBeautyUltraSkill("沒有圖片", "", 0)
-        ultra3 =  sleepingBeautyUltraSkill("沒有圖片", "", 0)
+        ultra1 =  sleepingBeautyUltraSkill("沒有圖片", "喚醒沉睡", 0)
+        ultra2 =  sleepingBeautyUltraSkill("沒有圖片", "白日夢魘", 0)
+        ultra3 =  sleepingBeautyUltraSkill("沒有圖片", "血脈重鑄", 0)
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)

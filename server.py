@@ -279,6 +279,10 @@ def main():
                     # choose a basic card from hand
                     
                     g.USEATKBASIC()
+                    if g.players[g.nowid].identity.idx == 7 and 163 in g.players[g.nowid].metamorphosis:
+                        r = g.players[g.nowid].identity.recycle_match(g, 1)
+                        if r == 1:
+                            nowATK += 2
                     if g.players[g.nowid].identity.idx == 4 and 151 in g.players[g.nowid].metamorphosis:
                         K = g.players[g.nowid].identity.spendKIforATK(g)
                         if K>3 or K<0:
