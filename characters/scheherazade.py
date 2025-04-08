@@ -107,11 +107,11 @@ class scheherazadeUltraSkill(ultraCard):
                 else:
                     continue
                 if locateFrom == loc:
-                    if g.players[g.nowid].identity.destiny_TOKEN_type[i]==2:
+                    if g.players[g.nowid].identity.destiny_TOKEN_type[i] == 2:
                         X += 2
                     else:
                         X += 1
-            g.damage(1-g.nowid, 3, 3+X)
+            g.damage(1 - g.nowid, 3, 3 + X)
         elif self.cardName == '切斷通路':
             X = 0
             for _ in range(3):
