@@ -19,7 +19,7 @@
 #include "vector.h"
 void init_client();
 void receive(game *game_status);
-int32_t send(game *game_status);
+void send(game *game_status);
 void destroy_client();
 
 #endif
