@@ -1,7 +1,7 @@
 import sys 
 sys.path.append("..")
 from game import *
-from character import *
+from characters.character import *
 class snowWhiteATKSkill(atkCard):
     def skill(self, g:game, level):
         if g.getRange()> 1:
@@ -64,16 +64,16 @@ class snowWhiteUltraSkill(ultraCard):
                 g.players[1-g.nowid].graveyard.append(g.players[1-g.nowid].hand[id])
                 if g.players[1-g.nowid].hand[id] == 134:
                     eneragy = 1
-                    for i in range(len(self.players[self.nowid].metamorphosis)):
-                        if self.players[1-self.nowid].metamorphosis[i] in [166,167,168]:
+                    for i in range(len(g.players[g.nowid].metamorphosis)):
+                        if g.players[1-g.nowid].metamorphosis[i] in [166,167,168]:
                             eneragy+=1
-                    self.players[self.nowid].energy += eneragy
+                    g.players[g.nowid].identity.energy += eneragy
                 if g.players[1-g.nowid].hand[id] in [131, 132, 133]:
                     posion = g.players[1-g.nowid].hand[id]-131
-                    for i in range(len(self.players[self.nowid].metamorphosis)):
-                        if self.players[self.nowid].metamorphosis[i] == 142:
+                    for i in range(len(g.players[g.nowid].metamorphosis)):
+                        if g.players[g.nowid].metamorphosis[i] == 142:
                             posion+=1
-                    self.lostLife( self.nowid, posion)    
+                    g.lostLife( g.nowid, posion)    
                 del g.players[1-g.nowid].hand[id]
             for _ in range(4):
                 g.drawCard(1-g.nowid)
@@ -93,7 +93,8 @@ class snowWhiteUltraSkill(ultraCard):
             if cnt > 0:
                 random.shuffle(g.players[1-g.nowid].deck)
 class snowWhite(character):
-    def idx():
+    @property
+    def idx(self):
         return 1
     def setup(self):
         self.maxlife = 34
@@ -104,10 +105,11 @@ class snowWhite(character):
         self.specialGate = 17
         self.remindPosion = [131+(i//6) for i in range(18)]
     def __init__(self, remindPosion = [131+(i//6) for i in range(18)], **kwargs):
+        super().__init__()
         self.setup()
         self.remindPosion = remindPosion
         self.characterName = "白雪公主"
-        self.picture = "沒有圖片"
+        self.picture = "./picture/character/snowWhite/character.png"
         atklv1 =  snowWhiteATKSkill("沒有圖片", "水晶碎片", 1)
         atklv2 =  snowWhiteATKSkill("沒有圖片", "水晶漩渦", 2)
         atklv3 =  snowWhiteATKSkill("沒有圖片", "水晶風暴", 3)
@@ -126,17 +128,17 @@ class snowWhite(character):
         self.moveSkill.append(movlv1)
         self.moveSkill.append(movlv2)
         self.moveSkill.append(movlv3)
-        meta1 =  snowWhiteMETASkill("沒有圖片", "水晶之棺", 0)
-        meta2 =  snowWhiteMETASkill("沒有圖片", "墮落之劫", 0)
-        meta3 =  snowWhiteMETASkill("沒有圖片", "劇毒之蝕", 0)
-        meta4 =  snowWhiteMETASkill("沒有圖片", "至純之毒", 0)
+        meta1 =  snowWhiteMETASkill("沒有圖片", "水晶之棺")
+        meta2 =  snowWhiteMETASkill("沒有圖片", "墮落之劫")
+        meta3 =  snowWhiteMETASkill("沒有圖片", "劇毒之蝕")
+        meta4 =  snowWhiteMETASkill("沒有圖片", "至純之毒")
         self.metamorphosisSkill.append(meta1)
         self.metamorphosisSkill.append(meta2)
         self.metamorphosisSkill.append(meta3)
         self.metamorphosisSkill.append(meta4)
-        ultra1 =  snowWhiteUltraSkill("沒有圖片", "七蛇之怒", 0)
-        ultra2 =  snowWhiteUltraSkill("沒有圖片", "魔鏡之雨", 0)
-        ultra3 =  snowWhiteUltraSkill("沒有圖片", "醞釀之災", 0)
+        ultra1 =  snowWhiteUltraSkill("沒有圖片", "七蛇之怒")
+        ultra2 =  snowWhiteUltraSkill("沒有圖片", "魔鏡之雨")
+        ultra3 =  snowWhiteUltraSkill("沒有圖片", "醞釀之災")
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)

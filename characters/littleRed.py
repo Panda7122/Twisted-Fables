@@ -1,7 +1,7 @@
 import sys 
 sys.path.append("..")
 from game import *
-from character import *
+from characters.character import *
 class littleRedATKSkill(atkCard):
     def skill(self, g:game, level,X=-1,Y=-1):
         global lastAct
@@ -60,8 +60,8 @@ class littleRedDEFSkill(defCard):
         if g.getRange()> self.level:
             g.cheating()
         g.damage(1-g.nowid, self.level, self.level)
-        g.players[g.nowid].defense+=1
-        g.players[g.nowid].defense = min(g.players[g.nowid].maxdefense, g.players[g.nowid].defense)
+        g.players[g.nowid].identity.defense+=1
+        g.players[g.nowid].identity.defense = min(g.players[g.nowid].identity.maxdefense, g.players[g.nowid].identity.defense)
         lastAct = lastAction(0 ,0, 0,0, [2, self.level, level, -1,-1])
 class littleRedMOVSkill(movCard):
     def skill(self, g:game, level, X=-1, Y=-1):
@@ -137,7 +137,7 @@ class littleRedMETASkill(metaCard):
                 g.nowUsingCardID = 138
                 g.status = state.DROP_CARD
                 ret = svr.connectBot(g.nowid, 'int32_t', g)
-                if ret > len(g.players[g.nowid].hand) or ret < 0:
+                if ret > len(g.players[g.nowid].hand) or ret <= 0:
                     # cheat
                     g.cheating()
                 g.status = s
@@ -155,8 +155,8 @@ class littleRedUltraSkill(ultraCard):
                 g.nowShowingCards = []
                 if len(g.players[g.nowid].attackSkill):
                     g.nowShowingCards.append(g.players[g.nowid].attackSkill[-1])
-                if len(g.players[g.nowid].defenseSkill):
-                    g.nowShowingCards.append(g.players[g.nowid].defenseSkill[-1])
+                if len(g.players[g.nowid].identity.defenseSkill):
+                    g.nowShowingCards.append(g.players[g.nowid].identity.defenseSkill[-1])
                 if len(g.players[g.nowid].moveSkill):
                     g.nowShowingCards.append(g.players[g.nowid].moveSkill[-1])
                 g.status = state.CHOOSECARDS
@@ -168,9 +168,9 @@ class littleRedUltraSkill(ultraCard):
                         g.cheating()
                     del g.players[g.nowid].attackSkill[0]
                 elif (c-11)%3 in [3,4,5]:
-                    if len(g.players[g.nowid].defenseSkill) == 0:
+                    if len(g.players[g.nowid].identity.defenseSkill) == 0:
                         g.cheating()
-                    del g.players[g.nowid].defenseSkill[0]
+                    del g.players[g.nowid].identity.defenseSkill[0]
                 elif (c-11)%3 in [6,7,8]:
                     if len(g.players[g.nowid].moveSkill) == 0:
                         g.cheating()
@@ -221,7 +221,7 @@ class littleRedUltraSkill(ultraCard):
                     for i in range(len(g.players[1-g.nowid].metamorphosis)):
                         if g.players[1-g.nowid].metamorphosis[i] in [166,167,168]:
                             eneragy+=1
-                    g.players[1-g.nowid].energy += eneragy
+                    g.players[1-g.nowid].identity.energy += eneragy
                 if g.players[g.nowid].hand[id] in [131, 132, 133]:
                     posion = g.players[g.nowid].hand[id]-131
                     for i in range(len(g.players[1-g.nowid].metamorphosis)):
@@ -232,7 +232,8 @@ class littleRedUltraSkill(ultraCard):
                 g.nowid = 1-g.nowid
         pass
 class littleRed(character):
-    def idx():
+    @property
+    def idx(self):
         return 0
     def setup(self):
         self.maxlife = 30
@@ -243,9 +244,10 @@ class littleRed(character):
         self.specialGate = 15  
         self.saveCard = [-1,-1,-1]
     def __init__(self, saveCard = [-1,-1,-1], **kwargs):
+        super().__init__()
         self.setup()
         self.characterName = "小紅帽"
-        self.picture = "沒有圖片"
+        self.picture = "./picture/character/littleRed/character.png"
         self.saveCard = saveCard
         atklv1 =  littleRedATKSkill("沒有圖片", "快速射擊", 1)
         atklv2 =  littleRedATKSkill("沒有圖片", "精準射擊", 2)
@@ -265,17 +267,17 @@ class littleRed(character):
         self.moveSkill.append(movlv1)
         self.moveSkill.append(movlv2)
         self.moveSkill.append(movlv3)
-        meta1 =  littleRedMETASkill("沒有圖片", "過載燃燒", 0)
-        meta2 =  littleRedMETASkill("沒有圖片", "兜帽系統", 0)
-        meta3 =  littleRedMETASkill("沒有圖片", "兜帽系統", 0)
-        meta4 =  littleRedMETASkill("沒有圖片", "板載緩存", 0)
+        meta1 =  littleRedMETASkill("沒有圖片", "過載燃燒")
+        meta2 =  littleRedMETASkill("沒有圖片", "兜帽系統")
+        meta3 =  littleRedMETASkill("沒有圖片", "兜帽系統")
+        meta4 =  littleRedMETASkill("沒有圖片", "板載緩存")
         self.metamorphosisSkill.append(meta1)
         self.metamorphosisSkill.append(meta2)
         self.metamorphosisSkill.append(meta3)
         self.metamorphosisSkill.append(meta4)
-        ultra1 =  littleRedUltraSkill("沒有圖片", "餓狼吞噬", 0)
-        ultra2 =  littleRedUltraSkill("沒有圖片", "系統入侵", 0)
-        ultra3 =  littleRedUltraSkill("沒有圖片", "復仇之雨", 0)
+        ultra1 =  littleRedUltraSkill("沒有圖片", "餓狼吞噬")
+        ultra2 =  littleRedUltraSkill("沒有圖片", "系統入侵")
+        ultra3 =  littleRedUltraSkill("沒有圖片", "復仇之雨")
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)

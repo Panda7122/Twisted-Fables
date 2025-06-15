@@ -11,7 +11,7 @@
 
 #include "vector.h"
 
-typedef struct _player {
+typedef struct __attribute__((__packed__)) _player {
     int8_t team;  // for 2v2 mode
     uint8_t locate[2];
     uint8_t character;
@@ -31,27 +31,28 @@ typedef struct _player {
     vector moveSkill;
     vector specialDeck;
     // Little Red Riding Hood 0
-    struct {
+    struct __attribute__((__packed__)) {
         int32_t saveCard[3];
     } redHood;
 
     // Snow White 1
-    struct {
+    struct __attribute__((__packed__)) {
         vector remindPosion;
     } snowWhite;
 
     // sleeping Beauty 2
-    struct {
+    struct __attribute__((__packed__)) {
         uint32_t AWAKEN_TOKEN;
         int8_t AWAKEN;  // awaken(1) or sleep(0)
         int8_t dayNightmareDrawRemind;
         int32_t atkRise;
         int32_t atkRiseTime;
         int8_t usedmeta1;
+        int8_t usedmeta2;
     } sleepingBeauty;
 
     // alice 3
-    struct {
+    struct __attribute__((__packed__)) {
         uint8_t identity;  // 0:none 1:紅心皇后 2:瘋帽子 3:柴郡貓
         int32_t riseBasic;
         int32_t restartTurn;
@@ -59,36 +60,36 @@ typedef struct _player {
     } alice;
 
     // Mulan 4
-    struct {
+    struct __attribute__((__packed__)) {
         uint32_t KI_TOKEN;
         uint8_t extraCard;
         uint8_t extraDraw;
     } mulan;
 
     // kaguya 5
-    struct {
+    struct __attribute__((__packed__)) {
         int8_t useDefenseAsATK;
         int8_t useMoveTarget;
     } kaguya;
 
     // mermaid 6
-    struct {
+    struct __attribute__((__packed__)) {
     } mermaid;
 
     // Match Girl 7
-    struct {
+    struct __attribute__((__packed__)) {
         uint32_t remindMatch;
         uint32_t pushedMatch;
     } matchGirl;
 
     // dorothy 8
-    struct {
+    struct __attribute__((__packed__)) {
         uint32_t COMBO_TOKEN;
         int8_t canCombo;
     } dorothy;
 
     // Scheherazade 9
-    struct {
+    struct __attribute__((__packed__)) {
         vector destiny_TOKEN_locate;
         vector destiny_TOKEN_type;  // 1:blue, 2:red
         int8_t selectToken;
@@ -183,7 +184,7 @@ SHUFFLE_POSION_TO_DECK        int8_t       shuffle posion to deck instead of put
 CHOOSE_CARD_BACK              int32_t      shuffle back the target card from graveyard to deck(0:cancel, value:index of card, **1 base**)
 
 SLEEP_ATK_HERTSELF            int32_t      sleeping beauty's skill hert herself(hint:you can check the last card you use to avoid cheating)
-USE_AWAKEN_TOKEN                int8_t       use awaken token when using skill(at most 3)
+USE_AWAKEN_TOKEN              int8_t       use awaken token when using skill(at most 3)
 LOST_LIFE_FOR_USESKILL        int8_t       sleeping beauty's metamorphosis, (choose lose 0(not trigger),2,4,6 life)
 RECYCLE_CARD                  int32_t      sleeping beauty's metamorphosis, (choose a card from graveyard(0 is not trigger, 1 base))
 
@@ -203,7 +204,7 @@ CHOOSE_MOVE_NEARBY            int8_t       move to the locate next to target(-1:
 
 KEEP_OR_BACK                  int8_t       keep the card or drop it(1:keep, 0:drop, the card store in nowusingCardID)
 LOST_LIFE_FOR_REMOVECARD      int8_t       kaguya's skill, (1:lost, 0:no)
-KAGUYA_MOVE_TARGET                   int8_t       kaguya's move metamorphosis(-n:left, n:right, n is distance)
+KAGUYA_MOVE_TARGET            int8_t       kaguya's move metamorphosis(-n:left, n:right, n is distance)
 
 MOVE_TO_TANTACLE              int32_t      locate you choose(should in tentacle_TOKEN_locate or your original locate)
 CHOOSE_TANTACLE               int32_t      choose a tantacle
@@ -222,7 +223,7 @@ TOKEN_GOAL                    int8_t       choose location of the token you choo
 GET_ULTRA                     int8_t       choose a special card to hand when your life lower than gate first time
 USE_METAMORPHOSIS             int32_t      trigger a active metamorphosis(return index of metamorphosis, 0 base)
 */
-typedef struct _game {
+typedef struct __attribute__((__packed__)) _game {
     player players[4];
     int8_t now_turn_player_id;
     int8_t playerMode;  // 1v1 MODE(0) or 2v2 MODE(1)

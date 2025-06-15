@@ -1,7 +1,7 @@
 import sys 
 sys.path.append("..")
 from game import *
-from character import *
+from characters.character import *
 class matchGirlATKSkill(atkCard):
     def skill(self, g:game, level):
         ra = 0    
@@ -49,7 +49,8 @@ class matchGirlUltraSkill(ultraCard):
             
         pass
 class matchGirl(character):
-    def idx():
+    @property
+    def idx(self):
         return 7
     def setup(self):
         self.maxlife = 36
@@ -60,12 +61,13 @@ class matchGirl(character):
         self.specialGate = 18
         self.remindMatch = 12
         self.pushedMatch = 0
-    def __init__(self, remindMatch, pushedMatch, **kwargs):
+    def __init__(self, remindMatch=12, pushedMatch=0, **kwargs):
+        super().__init__()
         self.setup()
         self.remindMatch = remindMatch
         self.pushedMatch = pushedMatch
         self.characterName = "火柴女孩"
-        self.picture = "沒有圖片"
+        self.picture = "./picture/character/matchGirl/character.png"
         atklv1 =  matchGirlATKSkill("沒有圖片", "虛幻的願望", 1)
         atklv2 =  matchGirlATKSkill("沒有圖片", "隱密的期望", 2)
         atklv3 =  matchGirlATKSkill("沒有圖片", "無厭的奢望", 3)
@@ -84,21 +86,21 @@ class matchGirl(character):
         self.moveSkill.append(movlv1)
         self.moveSkill.append(movlv2)
         self.moveSkill.append(movlv3)
-        meta1 =  matchGirlMETASkill("沒有圖片", "痛苦的儀式", 0)
-        meta2 =  matchGirlMETASkill("沒有圖片", "放縱的渴望", 0)
-        meta3 =  matchGirlMETASkill("沒有圖片", "魔鬼的凝視", 0)
-        meta4 =  matchGirlMETASkill("沒有圖片", "火焰的捉弄", 0)
-        meta5 =  matchGirlMETASkill("沒有圖片", "欲望的捉弄", 0)
-        meta6 =  matchGirlMETASkill("沒有圖片", "命運的捉弄", 0)
+        meta1 =  matchGirlMETASkill("沒有圖片", "痛苦的儀式")
+        meta2 =  matchGirlMETASkill("沒有圖片", "放縱的渴望")
+        meta3 =  matchGirlMETASkill("沒有圖片", "魔鬼的凝視")
+        meta4 =  matchGirlMETASkill("沒有圖片", "火焰的捉弄")
+        meta5 =  matchGirlMETASkill("沒有圖片", "欲望的捉弄")
+        meta6 =  matchGirlMETASkill("沒有圖片", "命運的捉弄")
         self.metamorphosisSkill.append(meta1)
         self.metamorphosisSkill.append(meta2)
         self.metamorphosisSkill.append(meta3)
         self.metamorphosisSkill.append(meta4)
         self.metamorphosisSkill.append(meta5)
         self.metamorphosisSkill.append(meta6)
-        ultra1 =  matchGirlUltraSkill("沒有圖片", "地獄烈焰", 0)
-        ultra2 =  matchGirlUltraSkill("沒有圖片", "厄運降臨", 0)
-        ultra3 =  matchGirlUltraSkill("沒有圖片", "貪婪詛咒", 0)
+        ultra1 =  matchGirlUltraSkill("沒有圖片", "地獄烈焰")
+        ultra2 =  matchGirlUltraSkill("沒有圖片", "厄運降臨")
+        ultra3 =  matchGirlUltraSkill("沒有圖片", "貪婪詛咒")
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)
@@ -106,10 +108,14 @@ class matchGirl(character):
         if(self.remindMatch>0):
             g.players[1-g.nowid].deck.insert(0, 134)
             self.remindMatch -= 1
+        else:
+            g.cheating()
     def specialMove(self, g:game):
-        if g.getRange() == 1 and not self.pushedMatch == 0:
+        if g.getRange() == 1 and self.pushedMatch == 0:
             self.pushMatch(g)
             self.pushedMatch = 1
+        else:
+            g.cheating()
     def spendEnergy(self, g:game):
         s = g.status
         g.status = state.SPEND_ENERGY

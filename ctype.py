@@ -1,6 +1,6 @@
 import cstruct
 
-class vector(cstruct.MemCStruct):
+class vector(cstruct.CStruct):
     __def__ = """
     struct vector {
         int32_t array[256];
@@ -28,9 +28,11 @@ class vector(cstruct.MemCStruct):
         return list(self.array[:self.SIZE])
     @classmethod
     def from_list(cls, ls:list):
-        return cls(array=ls, SIZE = len(ls))
+        sz = len(ls)
+        ls = list(ls) + [-1] * (256 - sz)
+        return cls(array=ls, SIZE = sz)
 
-class Cplayer(cstruct.MemCStruct):
+class Cplayer(cstruct.CStruct):
     __def__ = """
     struct player {
         int8_t team;  // for 2v2 mode
@@ -69,6 +71,8 @@ class Cplayer(cstruct.MemCStruct):
             int32_t atkRise;
             int32_t atkRiseTime;
             int8_t usedmeta1;
+            int8_t usedmeta2;
+            
         } sleepingBeauty;
 
         // alice 3
@@ -179,7 +183,7 @@ class Cstate(cstruct.CEnum):
         
     }
     """
-class Cgame(cstruct.MemCStruct):
+class Cgame(cstruct.CStruct):
     __def__ = """
     struct game {
         struct Cplayer players[4];

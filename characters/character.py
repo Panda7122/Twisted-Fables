@@ -7,11 +7,11 @@ class character:
     specialGate:int
     picture:str
     characterName:str
-    attackSkill:list = []
-    defenseSkill:list = []
-    moveSkill:list = []
-    metamorphosisSkill:list = []
-    ultraSkill:list = []
+    attackSkill:list
+    defenseSkill:list
+    moveSkill:list
+    metamorphosisSkill:list
+    ultraSkill:list
     __subclasses = {
         0: "littleRed",
         1: "snowWhite",
@@ -24,14 +24,19 @@ class character:
         8: "dorothy",
         9: "scheherazade"
     }
+    def __init__(self):
+        self.attackSkill = []
+        self.defenseSkill = []
+        self.moveSkill = []
+        self.metamorphosisSkill = []
+        self.ultraSkill = []
+    @classmethod
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        while cls.__name__ in cls.subclasses.values():
+        while cls.__name__ in cls.__subclasses.values():
             cls.__subclasses[list(cls.__subclasses.keys())[list(cls.__subclasses.values()).index(cls.__name__)]] = cls
-    def __init__(self, **kwargs):
-        pass
     @property 
-    def idx()->int:
+    def idx(self)->int:
         raise NotImplementedError
     @classmethod
     def getClass(cls, idx):

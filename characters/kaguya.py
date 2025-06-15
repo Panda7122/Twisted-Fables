@@ -1,7 +1,7 @@
 import sys 
 sys.path.append("..")
 from game import *
-from character import *
+from characters.character import *
 class kaguyaATKSkill(atkCard):
     def skill(self, g:game, level):
         defe = 1 if g.players[g.nowid].identity.defense >= 3 else 0
@@ -56,7 +56,8 @@ class kaguyaUltraSkill(ultraCard):
             g.players[g.nowid].identity.defense = min(g.players[g.nowid].identity.defense, g.players[g.nowid].identity.maxdefense) 
         pass
 class kaguya(character):
-    def idx():
+    @property
+    def idx(self):
         return 5
     def setup(self):
         self.maxlife = 32
@@ -67,11 +68,12 @@ class kaguya(character):
         self.specialGate = 16
         self.useDefenseAsATK = 0
     def __init__(self, useDefenseAsATK = 0,useMoveTarget = 0, **kwargs):
+        super().__init__()
         self.setup()
         self.useDefenseAsATK = useDefenseAsATK
         self.useMoveTarget = useMoveTarget
         self.characterName = "輝夜姬"
-        self.picture = "沒有圖片"
+        self.picture = "./picture/character/kaguya/character.png"
         atklv1 =  kaguyaATKSkill("沒有圖片", "領悟的光芒", 1)
         atklv2 =  kaguyaATKSkill("沒有圖片", "領悟的榮耀", 2)
         atklv3 =  kaguyaATKSkill("沒有圖片", "領悟的化身", 3)
@@ -90,17 +92,17 @@ class kaguya(character):
         self.moveSkill.append(movlv1)
         self.moveSkill.append(movlv2)
         self.moveSkill.append(movlv3)
-        meta1 =  kaguyaMETASkill("沒有圖片", "懲戒時刻", 0)
-        meta2 =  kaguyaMETASkill("沒有圖片", "血色月光", 0)
-        meta3 =  kaguyaMETASkill("沒有圖片", "靈性本能", 0)
-        meta4 =  kaguyaMETASkill("沒有圖片", "月下沉思", 0)
+        meta1 =  kaguyaMETASkill("沒有圖片", "懲戒時刻")
+        meta2 =  kaguyaMETASkill("沒有圖片", "血色月光")
+        meta3 =  kaguyaMETASkill("沒有圖片", "靈性本能")
+        meta4 =  kaguyaMETASkill("沒有圖片", "月下沉思")
         self.metamorphosisSkill.append(meta1)
         self.metamorphosisSkill.append(meta2)
         self.metamorphosisSkill.append(meta3)
         self.metamorphosisSkill.append(meta4)
-        ultra1 =  kaguyaUltraSkill("沒有圖片", "炙熱的竹刀", 0)
-        ultra2 =  kaguyaUltraSkill("沒有圖片", "注定的審判", 0)
-        ultra3 =  kaguyaUltraSkill("沒有圖片", "躁動的血性", 0)
+        ultra1 =  kaguyaUltraSkill("沒有圖片", "炙熱的竹刀")
+        ultra2 =  kaguyaUltraSkill("沒有圖片", "注定的審判")
+        ultra3 =  kaguyaUltraSkill("沒有圖片", "躁動的血性")
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)

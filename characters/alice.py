@@ -1,7 +1,7 @@
 import sys 
 sys.path.append("..")
 from game import *
-from character import *
+from characters.character import *
 class aliceATKSkill(atkCard):
     def skill(self, g:game, level):
         ls = g.showhands(1-g.nowid, level+2)
@@ -103,7 +103,8 @@ class aliceUltraSkill(ultraCard):
                 random.shuffle(g.players[1-g.nowid].deck)
         pass
 class alice(character):
-    def idx():
+    @property
+    def idx(self):
         return 3
     def setup(self):
         self.maxlife = 32
@@ -116,22 +117,23 @@ class alice(character):
         self.restartTurn = 0
         self.havedrestart = 0
     def __init__(self, identity = 0, riseBasic = 0, restartTurn = 0,havedrestart = 0, **kwargs):
+        super().__init__()
         self.setup()
         self.identity = identity
         self.riseBasic = riseBasic
         self.restartTurn = restartTurn
         self.havedrestart = havedrestart
         self.characterName = "愛麗絲"
-        self.picture = "沒有圖片"
+        self.picture = "./picture/character/alice/character.png"
         atklv1 =  aliceATKSkill("沒有圖片", "開啟牌局", 1)
         atklv2 =  aliceATKSkill("沒有圖片", "扭轉牌局", 2)
         atklv3 =  aliceATKSkill("沒有圖片", "操控牌局", 3)
         self.attackSkill.append(atklv1)
         self.attackSkill.append(atklv2)
         self.attackSkill.append(atklv3)
-        deflv1 =  aliceDEFSkill("沒有圖片", "魔力技巧", 1)
-        deflv2 =  aliceDEFSkill("沒有圖片", "精神幻術", 2)
-        deflv3 =  aliceDEFSkill("沒有圖片", "帽子戲法", 3)
+        deflv1 = aliceDEFSkill("沒有圖片", "魔力技巧", 1)
+        deflv2 = aliceDEFSkill("沒有圖片", "精神幻術", 2)
+        deflv3 = aliceDEFSkill("沒有圖片", "帽子戲法", 3)
         self.defenseSkill.append(deflv1)
         self.defenseSkill.append(deflv2)
         self.defenseSkill.append(deflv3)
@@ -141,17 +143,17 @@ class alice(character):
         self.moveSkill.append(movlv1)
         self.moveSkill.append(movlv2)
         self.moveSkill.append(movlv3)
-        meta1 =  aliceMETASkill("沒有圖片", "砍掉她的頭", 0)
-        meta2 =  aliceMETASkill("沒有圖片", "我們全是瘋子", 0)
-        meta3 =  aliceMETASkill("沒有圖片", "仙境降臨", 0)
-        meta4 =  aliceMETASkill("沒有圖片", "開始我的表演", 0)
+        meta1 = aliceMETASkill("沒有圖片", "砍掉她的頭")
+        meta2 = aliceMETASkill("沒有圖片", "我們全是瘋子")
+        meta3 = aliceMETASkill("沒有圖片", "仙境降臨")
+        meta4 = aliceMETASkill("沒有圖片", "開始我的表演")
         self.metamorphosisSkill.append(meta1)
         self.metamorphosisSkill.append(meta2)
         self.metamorphosisSkill.append(meta3)
         self.metamorphosisSkill.append(meta4)
-        ultra1 =  aliceUltraSkill("沒有圖片", "無休止的派對", 0)
-        ultra2 =  aliceUltraSkill("沒有圖片", "精彩的奇妙日", 0)
-        ultra3 =  aliceUltraSkill("沒有圖片", "遊戲盡在掌控", 0)
+        ultra1 = aliceUltraSkill("沒有圖片", "無休止的派對")
+        ultra2 =  aliceUltraSkill("沒有圖片", "精彩的奇妙日")
+        ultra3 =  aliceUltraSkill("沒有圖片", "遊戲盡在掌控")
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)
@@ -173,9 +175,9 @@ class alice(character):
                     g.cheating()
                 del g.players[g.nowid].attackSkill[0]
             elif (c-11)%12 in [3,4,5]:
-                if len(g.players[g.nowid].defenseSkill) == 0:
+                if len(g.players[g.nowid].identity.defenseSkill) == 0:
                     g.cheating()
-                del g.players[g.nowid].defenseSkill[0]
+                del g.players[g.nowid].identity.defenseSkill[0]
             elif (c-11)%12 in [6,7,8]:
                 if len(g.players[g.nowid].moveSkill) == 0:
                     g.cheating()

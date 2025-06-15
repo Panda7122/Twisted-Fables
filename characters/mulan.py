@@ -1,7 +1,7 @@
 import sys 
 sys.path.append("..")
 from game import *
-from character import *
+from characters.character import *
 class mulanATKSkill(atkCard):
     def skill(self, g:game, level):
         K = 0
@@ -24,7 +24,7 @@ class mulanATKSkill(atkCard):
                 for i in range(g.players[1-g.nowid].metamorphosis):
                     if g.players[1-g.nowid].metamorphosis[i] in [166,167,168]:
                         eneragy+=1
-                g.players[1-g.nowid].energy += eneragy
+                g.players[1-g.nowid].identity.energy += eneragy
             if card in [131, 132, 133]:
                 posion = card-131
                 for i in range(len(g.players[1-g.nowid].metamorphosis)):
@@ -62,7 +62,7 @@ class mulanMOVSkill(movCard):
                 for i in range(len(g.players[1-g.nowid].metamorphosis)):
                     if g.players[1-g.nowid].metamorphosis[i] in [166,167,168]:
                         eneragy+=1
-                g.players[1-g.nowid].energy += eneragy
+                g.players[1-g.nowid].identity.energy += eneragy
             if card in [131, 132, 133]:
                 posion = card-131
                 for i in range(len(g.players[1-g.nowid].metamorphosis)):
@@ -93,7 +93,8 @@ class mulanUltraSkill(ultraCard):
             g.players[g.nowid].identity.KI_TOKEN = 0
             g.damage(1-g.nowid, 1, X)
 class mulan(character):
-    def idx():
+    @property
+    def idx(self):
         return 4
     def setup(self):
         self.maxlife = 34
@@ -106,12 +107,13 @@ class mulan(character):
         self.extraCard = 0
         self.extraDraw = 0
     def __init__(self, KI_TOKEN = 0, extraCard = 0, extraDraw = 0, **kwargs):
+        super().__init__()
         self.setup()
         self.KI_TOKEN = KI_TOKEN
         self.extraCard = extraCard
         self.extraDraw = extraDraw
         self.characterName = "花木蘭"
-        self.picture = "沒有圖片"
+        self.picture = "./picture/character/mulan/character.png"
         atklv1 =  mulanATKSkill("沒有圖片", "不容小覷", 1)
         atklv2 =  mulanATKSkill("沒有圖片", "勢不可擋", 2)
         atklv3 =  mulanATKSkill("沒有圖片", "堅不可摧", 3)
@@ -130,17 +132,17 @@ class mulan(character):
         self.moveSkill.append(movlv1)
         self.moveSkill.append(movlv2)
         self.moveSkill.append(movlv3)
-        meta1 =  mulanMETASkill("沒有圖片", "氣慣全身", 0)
-        meta2 =  mulanMETASkill("沒有圖片", "主宰命運", 0)
-        meta3 =  mulanMETASkill("沒有圖片", "長驅直入", 0)
-        meta4 =  mulanMETASkill("沒有圖片", "暴風前夕", 0)
+        meta1 =  mulanMETASkill("沒有圖片", "氣慣全身")
+        meta2 =  mulanMETASkill("沒有圖片", "主宰命運")
+        meta3 =  mulanMETASkill("沒有圖片", "長驅直入")
+        meta4 =  mulanMETASkill("沒有圖片", "暴風前夕")
         self.metamorphosisSkill.append(meta1)
         self.metamorphosisSkill.append(meta2)
         self.metamorphosisSkill.append(meta3)
         self.metamorphosisSkill.append(meta4)
-        ultra1 =  mulanUltraSkill("沒有圖片", "氣沖雲霄", 0)
-        ultra2 =  mulanUltraSkill("沒有圖片", "直面混沌", 0)
-        ultra3 =  mulanUltraSkill("沒有圖片", "雷霆一擊", 0)
+        ultra1 =  mulanUltraSkill("沒有圖片", "氣沖雲霄")
+        ultra2 =  mulanUltraSkill("沒有圖片", "直面混沌")
+        ultra3 =  mulanUltraSkill("沒有圖片", "雷霆一擊")
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)

@@ -1,7 +1,7 @@
 import sys 
 sys.path.append("..")
 from game import *
-from character import *
+from characters.character import *
 class mermaidATKSkill(atkCard):
     def skill(self, g:game, level):
         dam =self.level+level
@@ -39,7 +39,7 @@ class mermaidMOVSkill(movCard):
                 for i in range(len(g.players[1-g.nowid].metamorphosis)):
                     if g.players[1-g.nowid].metamorphosis[i] in [166,167,168]:
                         eneragy+=1
-                g.players[1-g.nowid].energy += eneragy
+                g.players[1-g.nowid].identity.energy += eneragy
             if g.players[g.nowid].hand[id] in [131, 132, 133]:
                 posion = g.players[g.nowid].hand[id]-131
                 for i in range(len(g.players[1-g.nowid].metamorphosis)):
@@ -57,7 +57,8 @@ class mermaidUltraSkill(ultraCard):
         g.cheating()
 
 class mermaid(character):
-    def idx():
+    @property
+    def idx(self):
         return 6
     def setup(self):
         self.maxlife = 36
@@ -67,9 +68,10 @@ class mermaid(character):
         self.energy = 0
         self.specialGate = 18
     def __init__(self, **kwargs):
+        super().__init__()
         self.setup()
         self.characterName = "小美人魚"
-        self.picture = "沒有圖片"
+        self.picture = "./picture/character/mermaid/character.png"
         atklv1 =  mermaidATKSkill("沒有圖片", "海妖的召喚", 1)
         atklv2 =  mermaidATKSkill("沒有圖片", "海妖的歌聲", 2)
         atklv3 =  mermaidATKSkill("沒有圖片", "海妖的尖嘯", 3)
@@ -88,17 +90,17 @@ class mermaid(character):
         self.moveSkill.append(movlv1)
         self.moveSkill.append(movlv2)
         self.moveSkill.append(movlv3)
-        meta1 =  mermaidMETASkill("沒有圖片", "暴風之蝕", 0)
-        meta2 =  mermaidMETASkill("沒有圖片", "神秘共鳴", 0)
-        meta3 =  mermaidMETASkill("沒有圖片", "海的女兒", 0)
-        meta4 =  mermaidMETASkill("沒有圖片", "暗潮湧動", 0)
+        meta1 =  mermaidMETASkill("沒有圖片", "暴風之蝕")
+        meta2 =  mermaidMETASkill("沒有圖片", "神秘共鳴")
+        meta3 =  mermaidMETASkill("沒有圖片", "海的女兒")
+        meta4 =  mermaidMETASkill("沒有圖片", "暗潮湧動")
         self.metamorphosisSkill.append(meta1)
         self.metamorphosisSkill.append(meta2)
         self.metamorphosisSkill.append(meta3)
         self.metamorphosisSkill.append(meta4)
-        ultra1 =  mermaidUltraSkill("沒有圖片", "人魚復興", 0)
-        ultra2 =  mermaidUltraSkill("沒有圖片", "遠古甦醒", 0)
-        ultra3 =  mermaidUltraSkill("沒有圖片", "淨化之潮", 0)
+        ultra1 =  mermaidUltraSkill("沒有圖片", "人魚復興")
+        ultra2 =  mermaidUltraSkill("沒有圖片", "遠古甦醒")
+        ultra3 =  mermaidUltraSkill("沒有圖片", "淨化之潮")
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)

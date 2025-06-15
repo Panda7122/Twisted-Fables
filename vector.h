@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-typedef struct _vector {
+typedef struct __attribute__((__packed__)) _vector {
     int32_t array[256];
     uint32_t SIZE;
 } vector;

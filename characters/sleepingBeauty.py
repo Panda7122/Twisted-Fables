@@ -1,7 +1,7 @@
 import sys 
 sys.path.append("..")
 from game import *
-from character import *
+from characters.character import *
 class sleepingBeautyATKSkill(atkCard):
     def skill(self, g:game, level):
         if g.getRange() > 1:
@@ -48,7 +48,8 @@ class sleepingBeautyUltraSkill(ultraCard):
             g.players[g.nowid].identity.life += g.players[g.nowid].identity.AWAKEN_TOKEN
             g.players[g.nowid].identity.life = min(g.players[g.nowid].identity.life, g.players[g.nowid].identity.maxlife)
 class sleepingBeauty(character):
-    def idx():
+    @property
+    def idx(self):
         return 2
     def setup(self):
         self.maxlife = 42
@@ -65,6 +66,7 @@ class sleepingBeauty(character):
         self.usedmeta1 = 0
         self.usedmeta2 = 0
     def __init__(self, AWEAKEN = 0, AWAKEN_TOKEN = 0, dayNightmareDrawRemind = 0, atkRise = 0, atkRiseTime = 0, usedmeta1 = 0, usedmeta2 = 0, **kwargs):
+        super().__init__()
         self.setup()
         self.AWAKEN_TOKEN = AWAKEN_TOKEN
         self.AWAKEN = AWEAKEN
@@ -74,8 +76,8 @@ class sleepingBeauty(character):
         self.usedmeta1 = usedmeta1
         self.usedmeta2 = usedmeta2
         self.characterName = "睡美人"
-        self.picture = "沒有圖片\n\
-                        沒有圖片"
+        self.picture = "./picture/character/sleepingBeauty/character.png"
+        self.picture_awakend = "./picture/character/sleepingBeauty/character_awakend.png"
         atklv1 =  sleepingBeautyATKSkill("沒有圖片", "心靈震顫", 1)
         atklv2 =  sleepingBeautyATKSkill("沒有圖片", "心靈之怒", 2)
         atklv3 =  sleepingBeautyATKSkill("沒有圖片", "心靈狂怒", 3)
@@ -94,17 +96,17 @@ class sleepingBeauty(character):
         self.moveSkill.append(movlv1)
         self.moveSkill.append(movlv2)
         self.moveSkill.append(movlv3)
-        meta1 =  sleepingBeautyMETASkill("沒有圖片", "放血療法", 0)
-        meta2 =  sleepingBeautyMETASkill("沒有圖片", "血祭之禮", 0)
-        meta3 =  sleepingBeautyMETASkill("沒有圖片", "精神屏障", 0)
-        meta4 =  sleepingBeautyMETASkill("沒有圖片", "強制治療", 0)
+        meta1 =  sleepingBeautyMETASkill("沒有圖片", "放血療法")
+        meta2 =  sleepingBeautyMETASkill("沒有圖片", "血祭之禮")
+        meta3 =  sleepingBeautyMETASkill("沒有圖片", "精神屏障")
+        meta4 =  sleepingBeautyMETASkill("沒有圖片", "強制治療")
         self.metamorphosisSkill.append(meta1)
         self.metamorphosisSkill.append(meta2)
         self.metamorphosisSkill.append(meta3)
         self.metamorphosisSkill.append(meta4)
-        ultra1 =  sleepingBeautyUltraSkill("沒有圖片", "喚醒沉睡", 0)
-        ultra2 =  sleepingBeautyUltraSkill("沒有圖片", "白日夢魘", 0)
-        ultra3 =  sleepingBeautyUltraSkill("沒有圖片", "血脈重鑄", 0)
+        ultra1 =  sleepingBeautyUltraSkill("沒有圖片", "喚醒沉睡")
+        ultra2 =  sleepingBeautyUltraSkill("沒有圖片", "白日夢魘")
+        ultra3 =  sleepingBeautyUltraSkill("沒有圖片", "血脈重鑄")
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)

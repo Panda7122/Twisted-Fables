@@ -1,7 +1,7 @@
 import sys 
 sys.path.append("..")
 from game import *
-from character import *
+from characters.character import *
 class scheherazadeATKSkill(atkCard):
     def skill(self, g:game, level):
         g.damage(1-g.nowid, self.level, self.level+level)
@@ -50,7 +50,7 @@ class scheherazadeMOVSkill(movCard):
                     for i in range(len(g.players[1-g.nowid].metamorphosis)):
                         if g.players[1-g.nowid].metamorphosis[i] in [166,167,168]:
                             eneragy+=1
-                    g.players[1-g.nowid].energy += eneragy
+                    g.players[1-g.nowid].identity.energy += eneragy
                 if card in [131, 132, 133]:
                     posion = card-131
                     for i in range(len(g.players[1-g.nowid].metamorphosis)):
@@ -120,7 +120,8 @@ class scheherazadeUltraSkill(ultraCard):
                     X += 1
             g.damage(1-g.nowid, 3, X)
 class scheherazade(character):
-    def idx():
+    @property
+    def idx(self):
         return 9
     def setup(self):
         self.maxlife = 36
@@ -131,12 +132,15 @@ class scheherazade(character):
         self.specialGate = 18
         self.destiny_TOKEN_locate = []
         self.destiny_TOKEN_type = []
-    def __init__(self, destiny_TOKEN_locate,destiny_TOKEN_type, **kwargs):
+        self.selectToken = 0
+    def __init__(self, destiny_TOKEN_locate=[],destiny_TOKEN_type=[], selectToken = 0, **kwargs):
+        super().__init__()
         self.setup()
         self.destiny_TOKEN_locate = destiny_TOKEN_locate
         self.destiny_TOKEN_type = destiny_TOKEN_type
+        self.selectToken = selectToken
         self.characterName = "山魯佐德"
-        self.picture = "沒有圖片"
+        self.picture = "./picture/character/scheherazade/character.png"
         atklv1 =  scheherazadeATKSkill("沒有圖片", "消除夢境", 1)
         atklv2 =  scheherazadeATKSkill("沒有圖片", "銷毀記憶", 2)
         atklv3 =  scheherazadeATKSkill("沒有圖片", "扼殺存在", 3)
@@ -155,17 +159,17 @@ class scheherazade(character):
         self.moveSkill.append(movlv1)
         self.moveSkill.append(movlv2)
         self.moveSkill.append(movlv3)
-        meta1 =  scheherazadeMETASkill("沒有圖片", "命運之手", 0)
-        meta2 =  scheherazadeMETASkill("沒有圖片", "改寫欲望", 0)
-        meta3 =  scheherazadeMETASkill("沒有圖片", "重組思想", 0)
-        meta4 =  scheherazadeMETASkill("沒有圖片", "童話編織者", 0)
+        meta1 =  scheherazadeMETASkill("沒有圖片", "命運之手")
+        meta2 =  scheherazadeMETASkill("沒有圖片", "改寫欲望")
+        meta3 =  scheherazadeMETASkill("沒有圖片", "重組思想")
+        meta4 =  scheherazadeMETASkill("沒有圖片", "童話編織者")
         self.metamorphosisSkill.append(meta1)
         self.metamorphosisSkill.append(meta2)
         self.metamorphosisSkill.append(meta3)
         self.metamorphosisSkill.append(meta4)
-        ultra1 =  scheherazadeUltraSkill("沒有圖片", "系統刪除", 0)
-        ultra2 =  scheherazadeUltraSkill("沒有圖片", "無法自拔", 0)
-        ultra3 =  scheherazadeUltraSkill("沒有圖片", "切斷通路", 0)
+        ultra1 =  scheherazadeUltraSkill("沒有圖片", "系統刪除")
+        ultra2 =  scheherazadeUltraSkill("沒有圖片", "無法自拔")
+        ultra3 =  scheherazadeUltraSkill("沒有圖片", "切斷通路")
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)

@@ -1,7 +1,7 @@
 import sys 
 sys.path.append("..")
 from game import *
-from character import *
+from characters.character import *
 class dorothyATKSkill(atkCard):
     def skill(self, g:game, level):
         if g.getRange()>1:
@@ -51,7 +51,8 @@ class dorothyUltraSkill(ultraCard):
                 g.drawCard(g.nowid)
         pass
 class dorothy(character):
-    def idx():
+    @property
+    def idx(self):
         return 8
     def setup(self):
         self.maxlife = 40
@@ -62,12 +63,13 @@ class dorothy(character):
         self.specialGate = 18
         self.COMBO_TOKEN = 0
         self.canCombo = 0
-    def __init__(self, COMBO_TOKEN, canCombo, **kwargs):
+    def __init__(self, COMBO_TOKEN=0, canCombo=0, **kwargs):
+        super().__init__()
         self.setup()
         self.COMBO_TOKEN = COMBO_TOKEN
         self.canCombo = canCombo
         self.characterName = "桃樂絲"
-        self.picture = "沒有圖片"
+        self.picture = "./picture/character/dorothy/character.png"
         atklv1 =  dorothyATKSkill("沒有圖片", "目標確認", 1)
         atklv2 =  dorothyATKSkill("沒有圖片", "目標鎖定", 2)
         atklv3 =  dorothyATKSkill("沒有圖片", "目標清除", 3)
@@ -86,22 +88,22 @@ class dorothy(character):
         self.moveSkill.append(movlv1)
         self.moveSkill.append(movlv2)
         self.moveSkill.append(movlv3)
-        meta1 =  dorothyMETASkill("沒有圖片", "殺戮指令", 0)
-        meta2 =  dorothyMETASkill("沒有圖片", "超越機器", 0)
-        meta3 =  dorothyMETASkill("沒有圖片", "獲准極刑", 0)
-        meta4 =  dorothyMETASkill("沒有圖片", "無所遁形", 0)
+        meta1 =  dorothyMETASkill("沒有圖片", "殺戮指令")
+        meta2 =  dorothyMETASkill("沒有圖片", "超越機器")
+        meta3 =  dorothyMETASkill("沒有圖片", "獲准極刑")
+        meta4 =  dorothyMETASkill("沒有圖片", "無所遁形")
         self.metamorphosisSkill.append(meta1)
         self.metamorphosisSkill.append(meta2)
         self.metamorphosisSkill.append(meta3)
         self.metamorphosisSkill.append(meta4)
-        ultra1 =  dorothyUltraSkill("沒有圖片", "獅子", 0)
-        ultra2 =  dorothyUltraSkill("沒有圖片", "鐵皮人", 0)
-        ultra3 =  dorothyUltraSkill("沒有圖片", "稻草人", 0)
+        ultra1 =  dorothyUltraSkill("沒有圖片", "獅子")
+        ultra2 =  dorothyUltraSkill("沒有圖片", "鐵皮人")
+        ultra3 =  dorothyUltraSkill("沒有圖片", "稻草人")
         self.ultraSkill.append(ultra1)
         self.ultraSkill.append(ultra2)
         self.ultraSkill.append(ultra3)
     def dropCard(self, g:game):
-        s = self.status
+        s = g.status
         g.status = state.DROP_CARD
         ret = svr.connectBot(g.nowid, "int32_t", g)
         if ret >= len(g.players[g.nowid].hand) or ret < 0:
